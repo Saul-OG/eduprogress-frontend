@@ -1,0 +1,32 @@
+<div class="reports-page">
+  <h2>📊 Reportes Generales</h2>
+
+  <!-- Sección de estadísticas generales -->
+  <section *ngIf="generalStats">
+    <p><strong>Ejercicios totales:</strong> {{ generalStats.total_exercises || 0 }}</p>
+    <p><strong>Respuestas correctas:</strong> {{ generalStats.correct_answers || 0 }}</p>
+    <p><strong>Respuestas incorrectas:</strong> {{ generalStats.wrong_answers || 0 }}</p>
+    <p><strong>Precisión:</strong> {{ generalStats.accuracy || 0 }}%</p>
+  </section>
+
+  <!-- Promedio por materia -->
+  <section *ngIf="subjects.length > 0; else noSubjects">
+    <h3>📘 Promedio por materia</h3>
+    <ul>
+      <li *ngFor="let s of subjects">
+        {{ s.subject_name }} — {{ s.avg_progress }}% progreso promedio
+      </li>
+    </ul>
+  </section>
+  <ng-template #noSubjects><p>Sin datos de materias disponibles.</p></ng-template>
+
+  <!-- Materias más vistas -->
+  <section *ngIf="mostViewed.labels.length > 0">
+    <h3>📈 Materias más vistas</h3>
+    <ul>
+      <li *ngFor="let name of mostViewed.labels; let i = index">
+        {{ name }} — {{ mostViewed.values[i] }} vistas
+      </li>
+    </ul>
+  </section>
+</div>

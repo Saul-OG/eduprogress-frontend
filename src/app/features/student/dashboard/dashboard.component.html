@@ -1,0 +1,59 @@
+
+<div class="student-layout">
+<div class="dashboard-topbar gamified">
+  <div class="user-info">
+    <img class="avatar" src="https://api.dicebear.com/6.x/fun-emoji/svg?seed={{ authService.currentUserValue?.username || 'Estudiante' }}" alt="avatar" />
+    <div>
+      <div class="dashboard-greeting">
+        ¡Hola, <span class="username">{{ authService.currentUserValue?.username || 'Estudiante' }}</span> 👋!
+      </div>
+      <span class="subtitle">¡Listo para aprender y ganar puntos!</span>
+    </div>
+  </div>
+  <button class="logout-btn" (click)="logout()">
+    <span class="logout-icon">🚪</span> Salir
+  </button>
+</div>
+  
+  <div class="main-container">
+
+
+    
+    <div class="content-area">
+      <div class="dashboard-header">
+        <h1>📊 Dashboard de Progreso</h1>
+        <p>¡Increíble trabajo! Aquí puedes ver tu progreso en todas las materias y seguir mejorando cada día. 🌟</p>
+        
+        <div class="progress-grid" *ngIf="!loading">
+          <div class="progress-card" 
+               *ngFor="let subject of subjects"
+               [class]="subject.name.toLowerCase()"
+               (click)="selectSubject(subject.id)">
+            <h3>{{ subject.icon }} {{ subject.name }}</h3>
+            <div class="circular-progress">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" class="progress-bg"></circle>
+                <circle 
+                  cx="50" 
+                  cy="50" 
+                  r="45" 
+                  class="progress-bar"
+                  [style.stroke-dashoffset]="283 - (283 * getProgressForSubject(subject.id).percentage / 100)">
+                </circle>
+              </svg>
+              <div class="progress-value">
+                {{ getProgressForSubject(subject.id).percentage | number:'1.0-0' }}%
+              </div>
+            </div>
+            <p>{{ getProgressForSubject(subject.id).percentage >= 70 ? '¡Excelente!' : '¡Sigue así!' }} 🎉</p>
+          </div>
+        </div>
+        
+        <div class="loading" *ngIf="loading">
+          <div class="spinner"></div>
+          <p>Cargando tu progreso...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

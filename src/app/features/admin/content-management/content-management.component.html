@@ -1,0 +1,100 @@
+<h2>📚 Gestión de Contenido</h2>
+
+<div class="action-buttons" style="margin-bottom: 30px; display: flex; gap: 24px;">
+  <div>
+    <label>📘 Selecciona materia:</label>
+    <select [(ngModel)]="selectedSubjectId" (change)="loadTopics()">
+      <option [value]="1">Matemáticas</option>
+      <option [value]="2">Español</option>
+    </select>
+  </div>
+  <button class="btn btn-practice" (click)="openNew()">➕ Agregar Tema</button>
+  <button class="btn btn-info" (click)="exportReport()">📄 Exportar Contenido</button>
+</div>
+
+<div *ngIf="loading" class="loading">
+  <div class="spinner" aria-hidden="true"></div>
+  <p>Cargando temas…</p>
+</div>
+
+<div *ngIf="!loading && errorMsg" class="error-banner">
+  {{ errorMsg }}
+</div>
+
+<div *ngIf="!loading && !errorMsg" class="admin-section">
+  <h3>Lista de Temas</h3>
+  <div *ngIf="topics.length === 0" class="no-topics">No hay temas registrados.</div>
+  <div *ngIf="topics.length > 0">
+    <div class="content-item" *ngFor="let topic of topics">
+      <div class="info">
+        <div class="title">{{ topic.title }}</div>
+        <div class="subtitle">{{ (topic.type || 'texto') | uppercase }}</div>
+      </div>
+      <div class="content-actions">
+        <button class="btn-edit" (click)="openEdit(topic)">✏️ Editar</button>
+        <button class="btn-delete" (click)="deleteTopic(topic)">🗑️ Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3>{{ isEditing ? 'Editar Tema' : 'Nuevo Tema' }}</h3>
+
+    <form (ngSubmit)="saveTopic()">
+      <label>Título:</label>
+      <input [(ngModel)]="topicForm.title" name="title" required />
+
+      <label>Tipo:</label>
+      <select [(ngModel)]="topicForm.type" name="type">
+        <option value="texto">Teoría</option>
+        <option value="video">Video</option>
+        <option value="ABCD">Ejercicio ABCD</option>
+      </select>
+
+      <label>Descripción:</label>
+      <textarea [(ngModel)]="topicForm.description" name="description"></textarea>
+
+      <div *ngIf="topicForm.type === 'texto'">
+        <label>Contenido de teoría:</label>
+        <textarea [(ngModel)]="topicForm.theory_content" name="theory_content"></textarea>
+      </div>
+
+      <div *ngIf="topicForm.type === 'video'">
+        <label>URL de video:</label>
+        <input [(ngModel)]="topicForm.video_url" name="video_url" />
+      </div>
+
+     <div *ngIf="topicForm.type === 'ABCD'">
+  <label>Opción A:</label>
+  <input [(ngModel)]="topicForm.optionA" name="optionA" required />
+
+  <label>Opción B:</label>
+  <input [(ngModel)]="topicForm.optionB" name="optionB" required />
+
+  <label>Opción C:</label>
+  <input [(ngModel)]="topicForm.optionC" name="optionC" required />
+
+  <label>Opción D:</label>
+  <input [(ngModel)]="topicForm.optionD" name="optionD" required />
+
+  <label>Opción Correcta:</label>
+  <select [(ngModel)]="topicForm.correct_option" name="correct_option" required>
+    <option value="">Seleccione</option>
+    <option value="A">A</option>
+    <option value="B">B</option>
+    <option value="C">C</option>
+    <option value="D">D</option>
+  </select>
+</div>
+
+
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-save">Guardar</button>
+        <button type="button" class="btn btn-cancel" (click)="closeModal()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>

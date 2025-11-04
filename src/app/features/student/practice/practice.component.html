@@ -1,0 +1,58 @@
+<!-- 🎮 HUD Gamificado -->
+<div class="hud-container">
+  <div class="hud-item lives" aria-label="Vidas">
+    ❤️ <span>{{ lives }}</span>
+    <small>Vidas</small>
+  </div>
+
+  <div class="hud-item points" aria-label="Puntos">
+    🎯 <span>{{ points }}</span>
+    <small>Puntos</small>
+  </div>
+
+  <div class="hud-item level" aria-label="Nivel">
+    🧱 <span>{{ level }}</span>
+    <small>Nivel</small>
+  </div>
+
+  <div class="hud-item streak" [class.active]="streak > 0" aria-label="Racha">
+    🔥 <span>{{ streak }}</span>
+    <small>Racha</small>
+  </div>
+</div>
+
+<!-- Pantalla de práctica -->
+<div class="practice-screen" *ngIf="!loading && currentExercise; else loadingTpl">
+  <h2>{{ currentExercise.question }}</h2>
+
+  <div class="practice-options" role="group" aria-label="Opciones de respuesta">
+    <button
+      *ngFor="let option of currentExercise.options; trackBy: trackByIndex"
+      type="button"
+      (click)="submitAnswer(option)"
+      [attr.aria-label]="'Responder ' + option">
+      {{ option }}
+    </button>
+  </div>
+
+  <!-- Feedback visual -->
+  <div class="show-result" *ngIf="feedback">
+    <span [style.color]="isCorrect ? 'green' : 'red'">{{ feedback }}</span>
+  </div>
+
+  <!-- Info de progreso -->
+  <div class="user-progress">
+    <p><strong>Puntos:</strong> {{ points }}</p>
+    <p><strong>Nivel:</strong> {{ level }}</p>
+    <p><strong>Racha:</strong> {{ streak }} 🔥</p>
+    <p><strong>Vidas:</strong> {{ lives }} ❤️</p>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">
+    <div class="spinner" aria-hidden="true"></div>
+    <p *ngIf="loading">Cargando ejercicio…</p>
+    <p *ngIf="!loading && !currentExercise">No hay ejercicios para este tema.</p>
+  </div>
+</ng-template>

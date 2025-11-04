@@ -1,0 +1,24 @@
+/* === Tema claro y motivador (Estudiante) === */
+:host {
+  --bg: #f8faff;
+  --card-bg: #ffffff;
+  --primary: #667eea;
+  --primary-2: #764ba2;
+  --success: #43bb6d;
+  --warning: #ffb547;
+  --danger: #ff6f91;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.student-layout {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Puedes importar aquí los estilos de práctica y dashboard */
+@import './practice/practice.component';
+@import './dashboard/student-dashboard.component';

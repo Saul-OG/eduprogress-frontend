@@ -1,0 +1,153 @@
+/* ===========================
+   THEME (variables locales)
+=========================== */
+:host {
+  --bg: #ffffff;
+  --bg-soft: #f6f7fb;
+  --bg-soft-2: #eff2f9;
+  --text: #1d2233;
+  --muted: #6b7280;
+  --primary: #667eea;
+  --primary-2: #764ba2;
+  --ring: rgba(102,126,234,0.25);
+  --border: #e6e8ef;
+  --shadow: 0 30px 80px rgba(0,0,0,.35);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+}
+
+/* ===== Overlay centrado ===== */
+.modal-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.6);
+  backdrop-filter: blur(6px);
+  z-index:1000;
+  display:flex; align-items:center; justify-content:center;
+  padding:20px; overflow-y:auto;
+  animation:fadeIn .25s ease;
+}
+@keyframes fadeIn{from{opacity:0} to{opacity:1}}
+
+/* ===== Card del modal ===== */
+.modal-content{
+  position:relative; z-index:1001;
+  width:min(760px,96%);
+  background:var(--bg);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:28px 28px 22px;
+  animation:slideUp .28s ease;
+  display:flex; flex-direction:column; gap:18px;
+}
+@keyframes slideUp{from{opacity:0; transform:translateY(24px)} to{opacity:1; transform:translateY(0)}}
+
+/* ===== Header ===== */
+.modal-header{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:6px;
+
+  .modal-title-wrap{
+    h2{ margin:0 0 6px; font-weight:800; font-size:1.45rem; color:var(--text); }
+    .modal-subtitle{ margin:0; font-size:.93rem; color:var(--muted); }
+  }
+
+  .close-btn{
+    border:0; background:transparent; color:var(--muted);
+    font-size:1.4rem; line-height:1; padding:6px 8px; border-radius:10px; cursor:pointer;
+    transition:transform .2s ease, color .2s ease, background .2s ease;
+    &:hover{ transform:rotate(90deg); color:#ff4757; background:var(--bg-soft); }
+  }
+}
+
+/* ===== Tabs ===== */
+.modal-tabs{
+  display:flex; gap:10px;
+  .tab-btn{
+    flex:1; padding:10px 12px; border-radius:12px; border:1px solid var(--border);
+    background:var(--bg-soft); color:var(--text); font-weight:700; cursor:pointer;
+    transition:all .2s ease; letter-spacing:.2px;
+    &:hover{ background:var(--bg-soft-2) }
+    &.active{
+      background:linear-gradient(45deg,var(--primary),var(--primary-2));
+      color:#fff; border-color:transparent; box-shadow:0 8px 18px rgba(102,126,234,.28);
+    }
+  }
+}
+
+/* ===== Formulario base ===== */
+.modal-form{
+  .form-group{ margin-bottom:18px; }
+  .form-label{
+    display:block; margin-bottom:8px; font-size:.78rem; font-weight:800; color:var(--muted); letter-spacing:.6px; text-transform:uppercase;
+  }
+  .hint{ color:var(--muted); font-size:.85rem; }
+
+  input, select, textarea{
+    width:100%; border:2px solid var(--border); border-radius:12px;
+    background:#fff; color:var(--text); font-size:.96rem;
+    padding:12px 14px; transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    &:focus{ outline:0; border-color:var(--primary); box-shadow:0 0 0 6px var(--ring); transform:translateY(-1px); }
+  }
+  textarea{ min-height:128px; resize:vertical; }
+
+  .form-row{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:8px; }
+  .form-group.sm{ min-width:200px; flex:1 }
+}
+
+/* ===== Botón tipo enlace (Pegar ejemplo / Limpiar / examínalo) ===== */
+.link-btn{
+  appearance:none; border:0; background:transparent; padding:0;
+  color:var(--primary); font-weight:800; cursor:pointer;
+  transition:opacity .15s ease, transform .15s ease;
+  &:hover{ opacity:.8; text-decoration:underline; }
+}
+
+/* ===== Dropzone ===== */
+.tab-panel{ margin-top:2px; }
+.dropzone{
+  border:2px dashed var(--border); border-radius:16px; padding:20px; text-align:center;
+  background:var(--bg-soft);
+  transition:all .2s ease; margin-bottom:12px;
+  &:hover{ border-color:var(--primary); background:#eef1ff; box-shadow:0 6px 18px rgba(102,126,234,.15); }
+  .dropzone-text{ margin:0 0 6px; color:var(--muted); }
+}
+.file-meta{ margin-top:6px; color:var(--muted); font-size:.92rem; }
+
+/* ===== Totales (badges) ===== */
+.totals{ display:flex; gap:8px; flex-wrap:wrap; }
+.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border-radius:999px; background:var(--bg-soft); color:var(--text); font-weight:700; font-size:.85rem;
+  border:1px solid var(--border);
+}
+
+/* ===== Preview (tabla + chart) ===== */
+.preview{ margin-top:2px; }
+.section-title{ margin:2px 0 10px; font-weight:800; color:var(--text); }
+.preview-grid{
+  display:grid; gap:18px; grid-template-columns: 1.1fr 1fr;
+  @media (max-width: 860px){ grid-template-columns: 1fr; }
+}
+.preview-table{
+  background:#fff; border:1px solid var(--border); border-radius:14px; padding:10px;
+}
+table{
+  width:100%; border-collapse:collapse;
+  th, td{ padding:10px 12px; border-bottom:1px solid var(--border); font-size:.95rem; }
+  th{ background:var(--bg-soft); color:var(--text); text-align:left; }
+  td{ color:#3a4157; }
+}
+.preview-chart{
+  height:260px; background:#fff; border:1px solid var(--border); border-radius:14px; padding:8px; display:flex; align-items:center; justify-content:center;
+}
+
+/* ===== Actions ===== */
+.modal-actions{
+  display:flex; gap:12px; margin-top:6px;
+  .modal-btn{
+    appearance:none; border:0; border-radius:12px; cursor:pointer; font-weight:800; letter-spacing:.3px;
+    padding:12px 14px; transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    &:disabled{ opacity:.55; cursor:not-allowed; }
+    &:not(:disabled):hover{ transform:translateY(-1px); box-shadow:0 10px 22px rgba(0,0,0,.15); }
+  }
+  .modal-btn-primary{ color:#fff; background:linear-gradient(45deg,var(--primary),var(--primary-2)); }
+  .modal-btn-secondary{ background:var(--bg-soft); color:var(--text); border:1px solid var(--border); }
+}

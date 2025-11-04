@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+}
+
+// Variables globales
+:root {
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --success-color: #4caf50;
+  --danger-color: #ff4757;
+  --warning-color: #ff9800;
+  --info-color: #2196f3;
+}
+
+// Animación del gradiente (común en todos los componentes)
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Tema ADMIN (oscuro/pro) */
+body.admin-theme {
+  --bg: #8ebffb;
+  --card: #141836;
+  --soft: #1a2047;
+  --text: #000000;
+  --muted: #000000;
+  --border: #2a3263;
+  --primary: #667eea;
+  --primary-2: #8a7bff;
+  --success: #43bb6d;
+  --warn: #ffb547;
+  --danger: #ff6f91;
+
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Tema ESTUDIANTE (claro/vivo) */
+body.student-theme {
+  --bg: #f8faff;
+  --card: #ffffff;
+  --soft: #f1f4ff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --primary: #667eea;
+  --primary-2: #764ba2;
+  --success: #43bb6d;
+  --warn: #ffb547;
+  --danger: #ff6f91;
+
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* base */
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0; padding: 0;
+  transition: background .3s ease, color .3s ease;
+}
+
+
+/* Fuerza fondo y esquema SOLO en admin */
+body.admin-theme,
+body.admin-theme html,
+body.admin-theme app-root,
+body.admin-theme .admin-layout {
+  background-color: #8ebffb !important;
+  color-scheme: dark !important;
+}
+
+/* Fuerza fondo y esquema SOLO en estudiante */
+body.student-theme,
+body.student-theme html,
+body.student-theme app-root,
+body.student-theme .student-layout {
+  background-color: #f8faff !important;
+  color-scheme: light !important;
+}
+
+
+body {
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+  overflow-y: auto;
+   /* color base del texto */
+}
+
+/* elimina cualquier fondo interno que pueda sobresalir */
+app-root > * {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* You can add global styles to this file, and also import other style files */

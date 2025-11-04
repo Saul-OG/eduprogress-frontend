@@ -1,0 +1,67 @@
+<div class="subject-detail-bg"></div>
+<div class="subject-detail">
+
+  <!-- Banner de la materia -->
+  <div class="subject-banner">
+    <div class="sb-icon">{{ subject?.icon }}</div>
+    <div class="sb-info">
+      <h2 class="sb-title">{{ subject?.name }}</h2>
+      <p class="sb-progress">
+        Progreso: <span class="sb-progress-val">{{ progress?.percentage || 0 | number:'1.0-0' }}%</span>
+      </p>
+      <div class="sb-desc">{{ subject?.description }}</div>
+    </div>
+  </div>
+
+  <!-- Lista de topics / mensaje vacio -->
+  <div class="topics-list">
+    <div *ngIf="topics.length === 0" class="topics-empty">
+      <span class="te-icon">🔍</span>
+      <span class="te-text">Aún no hay temas activos en esta materia.<br>¡Vuelve pronto!</span>
+    </div>
+    <div *ngFor="let topic of topics" class="topic-card">
+      <div class="topic-header">
+        <span class="topic-icon">
+          {{
+            topic.type === 'texto' ? '📖' :
+            topic.type === 'video' ? '🎬' :
+            topic.type === 'ABCD' ? '🧩' :
+            '📚'
+          }}
+        </span>
+        <div>
+          <h3 class="topic-title">{{ topic.title }}</h3>
+          <span class="topic-type">
+            {{
+              topic.type === 'texto' ? 'Teoría' :
+              topic.type === 'video' ? 'Video' :
+              topic.type === 'ABCD' ? 'Ejercicio ABCD' :
+              'Tema'
+            }}
+          </span>
+        </div>
+      </div>
+      <p class="topic-desc">{{ topic.description }}</p>
+      <div class="action-buttons">
+        <button class="btn btn-info" *ngIf="topic.type === 'texto'" (click)="goToTheory(topic.id)">
+          📖 Ver teoría
+        </button>
+        <button class="btn btn-info" *ngIf="topic.type === 'video'" (click)="goToVideo(topic)">
+          🎬 Ver video
+        </button>
+       <button class="btn btn-practice" (click)="goToPractice(topic.id)">
+  🧩 Practicar
+</button>
+  
+      </div>
+    </div>
+  </div>
+
+  <!-- Siempre visible al final para volver al dashboard -->
+  <div class="subject-actions">
+    <button class="btn-back" (click)="goBackDashboard()">
+      ← Volver al Dashboard
+    </button>
+  </div>
+
+</div>

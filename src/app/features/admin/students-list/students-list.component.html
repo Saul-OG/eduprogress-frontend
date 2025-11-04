@@ -1,0 +1,26 @@
+<div class="admin-layout">
+  <div class="main-container">
+    <div class="content-area">
+      <div class="admin-screen">
+        <h2>👥 Gestión de Estudiantes</h2>
+        
+        <div class="admin-section" style="max-width: 300px; margin-bottom: 36px;">
+          <h3>📊 Total de Usuarios</h3>
+          <div class="stats-grid" style="grid-template-columns: 1fr;">
+            <div class="stat-card" style="text-align: center;">
+              <div class="stat-icon" style="font-size: 2.3rem;">👤</div>
+              <div class="stat-value" style="font-size: 2.7rem; margin: 0.2em 0;">{{ stats.total_users || 0 }}</div>
+              <div class="stat-label" style="color: #8690b3;">Usuarios registrados</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="action-buttons" style="margin-top: 22px;">
+          <button class="btn btn-info" (click)="exportStudents()">
+            📊 Exportar Datos
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

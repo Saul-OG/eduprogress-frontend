@@ -1,0 +1,41 @@
+<div class="theory-bg"></div>
+
+<div class="student-layout">
+  <div class="main-container">
+    <div class="content-area theory-screen">
+
+      <ng-container *ngIf="!loading && topic; else loadingTpl">
+        <h2>📖 Contenido Teórico - {{ topic.title }}</h2>
+
+        <div class="theory-content">
+          <div [innerHTML]="topic.theory_content"></div>
+        </div>
+
+        <div *ngIf="topic.type === 'video' && topic.video_url">
+          <h2>Recurso en Video</h2>
+          <div class="video-wrapper">
+            <iframe
+              [src]="sanitizeUrl(topic.video_url)"
+              width="100%"
+              height="330"
+              frameborder="0"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn btn-back" (click)="goBack()">← Volver a Materia</button>
+        </div>
+      </ng-container>
+
+      <ng-template #loadingTpl>
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Cargando contenido teórico...</p>
+        </div>
+      </ng-template>
+
+    </div>
+  </div>
+</div>

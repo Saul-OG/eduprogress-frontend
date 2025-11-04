@@ -1,0 +1,22 @@
+<aside class="admin-sidebar">
+  <div class="sidebar-brand">
+    <span class="logo">🎓</span>
+  </div>
+  <nav>
+    <a routerLink="content" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" title="Gestión de Contenido">
+      📁
+    </a>
+    <a routerLink="students" routerLinkActive="active" title="Usuarios">
+      👥
+    </a>
+    <a routerLink="reports" routerLinkActive="active" title="Reportes">
+      📊
+    </a>
+    <a routerLink="charts" routerLinkActive="active" title="Gráficos">
+      📈
+    </a>
+  </nav>
+  <button class="logout-btn" (click)="logout()" title="Cerrar sesión">
+    ⎋
+  </button>
+</aside>
