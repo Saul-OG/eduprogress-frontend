@@ -1,22 +1,34 @@
-import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+// src/app/core/guards/admin.guard.ts
+import { CanActivateFn, Router } from '@angular/router';
+import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { of } from 'rxjs';
+import { catchError, map, } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AdminGuard implements CanActivate {
-  constructor(
-    private router: Router,
-    private authService: AuthService
-  ) {}
+export const adminGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
-      return true;
-    }
+  // Si ya está en memoria y es admin, pasa
+  if (auth.isAuthenticated() && auth.isAdmin()) return true;
 
-    this.router.navigate(['/']);
-    return false;
-  }
-}
+  // Rehidrata primero y decide
+  return auth.me().pipe(
+    map(() => {
+      if (auth.isAuthenticated() && auth.isAdmin()) return true;
+
+      // tiene sesión pero no es admin → a /student
+      if (auth.isAuthenticated()) {
+        router.navigate(['/student']);
+      } else {
+        router.navigate(['/login']);
+      }
+      return false;
+    }),
+    catchError(() => {
+      router.navigate(['/login']);
+      return of(false);
+    })
+  );
+};
+

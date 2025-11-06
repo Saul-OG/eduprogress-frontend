@@ -1,28 +1,43 @@
 import { TestBed } from '@angular/core/testing';
-import { AdminGuard } from './admin.guard';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Router } from '@angular/router';
+import { provideRouter, CanActivateFn } from '@angular/router';
+import { adminGuard } from './admin.guard';
+import { AuthService } from '../services/auth.service';
 
-describe('AdminGuard', () => {
-  let guard: AdminGuard;
-  let router: Router;
+describe('adminGuard (functional)', () => {
+  let mockAuth: Partial<AuthService>;
 
   beforeEach(() => {
+    mockAuth = {
+      isAuthenticated: () => true,
+      isAdmin: () => true,
+    };
+
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
-      providers: [AdminGuard]
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: mockAuth },
+      ],
     });
-    guard = TestBed.inject(AdminGuard);
-    router = TestBed.inject(Router);
   });
 
-  it('should be created', () => {
-    expect(guard).toBeTruthy();
+  const runGuard: CanActivateFn = (...params) =>
+    TestBed.runInInjectionContext(() => adminGuard(...params));
+
+  it('permite acceso a admin autenticado', () => {
+    mockAuth.isAuthenticated = () => true;
+    mockAuth.isAdmin = () => true;
+    const result = runGuard({} as any, {} as any);
+    expect(result).toBeTrue();
   });
 
-  // Ejemplo de prueba de canActivate
-  it('should call canActivate', () => {
-    const canActivateResult = guard.canActivate(null as any, null as any);
-    expect(canActivateResult).toBeDefined();
+  it('bloquea acceso si NO es admin', () => {
+    mockAuth.isAuthenticated = () => true;
+    mockAuth.isAdmin = () => false;
+    const result = runGuard({} as any, {} as any);
+    expect(result).toBeFalse();
   });
 });
+
+

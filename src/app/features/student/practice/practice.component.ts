@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ExerciseService } from '../../../core/services/exercise.service';
 import { Exercise } from '../../../core/models/exercise.model';
 import { LivesService } from '../../../core/services/lives.service';
-// ✅ importa el modelo aquí
+
 
 @Component({
   selector: 'app-practice',
@@ -32,7 +32,7 @@ export class PracticeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // ✅ Lee ambos parámetros correctamente (subjectId y topicId)
+
     this.route.paramMap.subscribe(params => {
       const sId = params.get('subjectId');
       const tId = params.get('topicId');

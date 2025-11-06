@@ -1,20 +1,40 @@
 import { TestBed } from '@angular/core/testing';
-import { CanActivateFn } from '@angular/router';
-import { AuthGuard } from './auth.guard';
+import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter, CanActivateFn } from '@angular/router';
+import { authGuard } from './auth.guard';
+import { AuthService } from '../services/auth.service';
+import { of } from 'rxjs';
 
-
-describe('AuthGuard', () => {
-  const executeGuard: CanActivateFn = (...guardParameters) =>
-    TestBed.runInInjectionContext(() => {
-      const guard = TestBed.inject(AuthGuard);
-      return guard.canActivate(...guardParameters);
-    });
+describe('authGuard (functional)', () => {
+  let mockAuth: Partial<AuthService>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    mockAuth = {
+      isAuthenticated: () => true, // cambia a false para probar redirección
+    };
+
+    TestBed.configureTestingModule({
+      imports: [RouterTestingModule],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: mockAuth },
+      ],
+    });
   });
 
-  it('should be created', () => {
-    expect(executeGuard).toBeTruthy();
+  const runGuard: CanActivateFn = (...params) =>
+    TestBed.runInInjectionContext(() => authGuard(...params));
+
+  it('permite el acceso si está autenticado', () => {
+    mockAuth.isAuthenticated = () => true;
+    const result = runGuard({} as any, {} as any);
+    expect(result).toBeTrue();
+  });
+
+  it('bloquea el acceso si NO está autenticado', () => {
+    mockAuth.isAuthenticated = () => false;
+    const result = runGuard({} as any, {} as any);
+    // Para guards síncronos devolverá false
+    expect(result).toBeFalse();
   });
 });

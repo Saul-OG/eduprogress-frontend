@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { Exercise } from '../models/exercise.model'; // ✅ Import correcto
+import { Exercise } from '../models/exercise.model'; 
 
 @Injectable({
   providedIn: 'root'

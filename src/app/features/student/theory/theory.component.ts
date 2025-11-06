@@ -11,7 +11,7 @@ import { Topic } from '../../../core/models/topic.model';
 })
 export class TheoryComponent implements OnInit {
 
-  loading = true;              // ✅ Propiedad usada en el HTML
+  loading = true;              
   topic: Topic | null = null;
   subjectId!: number;
   topicId!: number;
@@ -20,7 +20,7 @@ export class TheoryComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private subjectService: SubjectService,
-    private sanitizer: DomSanitizer        // ✅ Inyección para limpiar URLs
+    private sanitizer: DomSanitizer        
   ) {}
 
   ngOnInit(): void {
