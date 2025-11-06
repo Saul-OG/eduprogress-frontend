@@ -10,6 +10,7 @@ export interface User {
   streak_days: number;
   created_at?: string;
   updated_at?: string;
+  is_admin?: boolean; // Para compatibilidad con backend antiguo
 }
 export interface LoginRequest {
   username: string;

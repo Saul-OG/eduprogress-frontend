@@ -37,8 +37,10 @@ export class AuthService {
 
   /** Verifica si el usuario es administrador */
   isAdmin(): boolean {
-    return this.currentUserValue?.role === 'admin';
+    const user = this.currentUserValue;
+    return user ? (user.role === 'admin' || user.is_admin === true) : false;
   }
+
 
   /** Verifica si el usuario es estudiante */
   isStudent(): boolean {
