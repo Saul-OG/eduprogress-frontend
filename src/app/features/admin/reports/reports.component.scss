@@ -1,201 +1,151 @@
-/* ======================================
-   Layout base del módulo de Reportes
-   ====================================== */
+/* ====== Variables base (usa las globales si ya existen) ====== */
+:root {
+  --bg: linear-gradient(180deg, #a8c7ff 0%, #1c68ab 100%);
+  --text: #ffffff;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --surface-weak: #f7fcff;
+  --border: #d0d7ff;
+  --ring: rgba(53, 136, 255, 0.16);
+  --shadow-1: 0 6px 16px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.08);
 
-.admin-layout {
+  /* Si ya tienes esta var en el layout general, la tomamos; si no, backup de 76px */
+  --sidebar-collapsed: 76px;
+
+  /* Offset opcional para empujar el h2 un poco más a la derecha */
+  --title-offset: clamp(18px, 6vw, 120px);
+}
+
+/* ====== Contenedor principal ====== */
+.reports-page {
   min-height: 100vh;
-  background: radial-gradient(1200px 800px at 85% -10%, rgba(88,96,255,.08), transparent 60%),
-              radial-gradient(900px 600px at 5% 110%, rgba(53,192,255,.10), transparent 60%),
-              var(--bg);
-
-  /* Si manejas estado de expansión del sidebar, añade esta clase al root */
-  &.sidebar-expanded .content-area { margin-left: var(--sidebar-expanded); }
-}
-
-.main-container {
-  display: block;
-}
-
-.content-area {
-  margin-left: var(--sidebar-collapsed);
-  transition: margin-left .25s ease;
-  padding: 60px clamp(40px, 6vw, 80px) 40px; /* centrado visual con el sidebar */
   color: var(--text);
-}
+  padding: 56px clamp(24px, 4vw, 64px) 40px;
+  margin-left: var(--sidebar-collapsed);
+  background:
+    radial-gradient(60% 60% at 20% 15%, rgba(148, 149, 175, 0.08), transparent 100%),
+    radial-gradient(60% 60% at 90% 80%, rgba(53, 192, 255, 0.1), transparent 100%),
+    var(--bg);
+  transition: margin-left .3s ease;
 
-.admin-screen {
-  max-width: 1200px;        /* centra la columna */
-  margin: 0 auto;
-  animation: fadeIn .25s ease;
-
-  h2 {
-    font-size: clamp(1.4rem, 2.8vw, 1.9rem);
+  /* ===== Título principal ===== */
+  > h2 {
+    text-align: left;
+    margin: 0 0 24px var(--title-offset);
+    font-size: clamp(24px, 3vw, 32px);
     font-weight: 800;
     letter-spacing: .3px;
-    margin-bottom: 22px;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(102, 126, 234, 0.45);
   }
 }
 
-/* ======================================
-   Barra de acciones
-   ====================================== */
-
-.action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  background: rgba(255,255,255,.03);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 18px;
-  box-shadow: var(--shadow-1);
-  margin-bottom: 28px;
-
-  .btn {
-    border: 0;
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform .15s ease, opacity .2s ease;
-
-    &.btn-practice {
-      background: linear-gradient(135deg, #4e5dff, #35c0ff);
-      color: #fff;
-      &:hover { transform: translateY(-2px); opacity: .92; }
-    }
-    &.btn-info {
-      background: rgba(255,255,255,.08);
-      border: 1px solid var(--border);
-      color: var(--text);
-      &:hover { transform: translateY(-1px); background: rgba(255,255,255,.14); }
-    }
-  }
-}
-
-/* ======================================
-   Secciones
-   ====================================== */
-
-.admin-section {
+/* ====== Tarjetas/secciones ====== */
+.reports-page section {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   box-shadow: var(--shadow-1);
-  padding: 22px;
-  margin-bottom: 24px;
-
-  h3 {
-    font-size: 1.15rem;
-    font-weight: 800;
-    margin-bottom: 14px;
-  }
+  padding: clamp(18px, 2.4vw, 26px);
+  max-width: 1100px;
+  margin: 0 auto 20px;
+  animation: fadeIn .25s ease;
 }
 
-/* ======================================
-   Gráficos
-   ====================================== */
-
-.charts-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: clamp(12px, 2vw, 20px);
+/* Subtítulos dentro de sección */
+.reports-page section > h3 {
+  margin: 0 0 14px 0;
+  font-size: clamp(18px, 2.2vw, 22px);
+  font-weight: 700;
+  color: #15234a;
 }
 
-.chart-container {
-  grid-column: span 6;
-  background: rgba(255,255,255,.05);
+/* ====== Bloque de “estadísticas generales” ====== */
+.reports-page section p {
+  margin: 6px 0;
+  padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: box-shadow .2s ease, transform .15s ease;
-
-  &:hover { box-shadow: var(--shadow-2); transform: translateY(-2px); }
-
-  .chart-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(26,31,69,.85), rgba(26,31,69,.6));
-  }
-  .chart-title { font-weight: 700; }
-
-  /* Altura sensible para Chart.js */
-  canvas {
-    display: block;
-    width: 100% !important;
-    height: clamp(260px, 34vh, 380px) !important;
-  }
+  border-radius: 10px;
+  background: var(--surface-weak);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
+}
+.reports-page section p strong {
+  font-weight: 700;
+  color: #ffffff;
 }
 
-/* ======================================
-   Métricas / Report cards
-   ====================================== */
-
-.reports-grid {
+/* ====== Listas (promedios, más vistas) ====== */
+.reports-page ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: clamp(12px, 2vw, 20px);
+  gap: 10px;
 }
-
-.report-card {
-  grid-column: span 6;
-  background: linear-gradient(180deg, rgba(26,31,69,.85), rgba(26,31,69,.70));
+.reports-page li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: var(--shadow-1);
-  transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
-
-  &:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: rgba(88,96,255,.35); }
-
-  .report-title { font-weight: 700; margin-bottom: 6px; }
-  .report-value {
-    font-size: clamp(1.4rem, 3vw, 1.8rem);
-    font-weight: 800;
-    margin: 4px 0 8px;
-  }
-  .report-description { color: var(--muted); font-size: .95rem; margin-bottom: 12px; }
-
-  .report-stats {
-    display: grid;
-    grid-auto-flow: column;
-    gap: 12px;
-    align-items: start;
-
-    .stat-item {
-      background: rgba(255,255,255,.05);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      text-align: center;
-      .stat-number { font-weight: 800; }
-      .stat-label { color: var(--muted); font-size: .85rem; }
-    }
-  }
+  border-radius: 10px;
+  background: #fff;
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.reports-page li::before {
+  content: "";
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 999px;
+  background: #4e5dff;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+.reports-page li:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
 }
 
-/* ======================================
-   Responsive
-   ====================================== */
-
-@media (max-width: 1100px) {
-  .chart-container { grid-column: span 12; }
-  .report-card   { grid-column: span 12; }
+/* Mensaje “sin datos” */
+.reports-page ng-template + p,
+.reports-page .empty,
+.reports-page .no-data {
+  color: var(--muted);
+  text-align: center;
+  padding: 14px;
 }
 
-@media (max-width: 768px) {
-  .content-area { padding: 28px; }
-  .action-buttons { gap: 12px; }
-  .report-stats { grid-auto-flow: row; }
-}
-
-/* ======================================
-   Animación sutil de entrada
-   ====================================== */
+/* ====== Animación suave ====== */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
+/* ====== Responsive ====== */
+@media (max-width: 1024px) {
+  .reports-page { margin-left: calc(var(--sidebar-collapsed) * .6); }
+  .reports-page > h2 { margin-left: clamp(12px, 5vw, 64px); }
+}
+@media (max-width: 768px) {
+  .reports-page {
+    margin-left: 0;                 /* en móvil el sidebar suele colapsar */
+    padding: 24px 16px 32px;
+  }
+  .reports-page > h2 { margin-left: 0; text-align: center; }
+}
+
+/* ====== (Opcional) Dark mode si lo usas ====== */
+@media (prefers-color-scheme: dark) {
+  .reports-page section {
+    background: #ffffffc3;
+    border-color: #1f2a44;
+  }
+  .reports-page section p,
+  .reports-page li {
+    background: #4a67a1;
+    border-color: #42598e;
+    color: #e5eaf5;
+  }
+  .reports-page section > h3 { color: #dfe6ff; }
+}

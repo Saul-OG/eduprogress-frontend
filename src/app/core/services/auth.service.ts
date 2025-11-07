@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, map, catchError, of } from 'rxjs';
+
 import { Router } from '@angular/router';
 import { environment } from '@env/environment';
+
 import { User, LoginRequest, LoginResponse } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -24,7 +26,22 @@ export class AuthService {
   get currentUserValue(): User | null {
     return this.currentUserSubject.value;
   }
+me(): Observable<User | null> {
+  return this.http.get<User>(`${this.apiUrl}/me`).pipe(
+    tap((user) => {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      this.currentUserSubject.next(user);
+    }),
+    catchError(() => of(null))
+  );
+}
 
+/** Restaura sesión al iniciar la app si hay token */
+restoreSession(): Observable<boolean> {
+  const token = localStorage.getItem('access_token');
+  if (!token) return of(false);
+  return this.me().pipe(map((user) => !!user), catchError(() => of(false)));
+}
   /** Devuelve el token actual */
   getToken(): string | null {
     return localStorage.getItem('access_token');

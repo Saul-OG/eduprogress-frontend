@@ -1,249 +1,229 @@
-:host {
-  --primary: #4c6ef5;
-  --primary-2: #74c0fc;
-  --accent: #a5d8ff;
-  --success: #2b8a3e;
-  --bg: linear-gradient(-45deg, #e9f5ff, #f8fbff, #dfe9ff, #edf6ff);
-  --text: #1e2a44;
-  --muted: #5b6b8c;
-  --border: #d9e3f5;
-}
-
-/* ===== Fondo animado ===== */
+/* ======= SUBJECT DETAIL - PASTEL #a8c7ff ======= */
 .subject-detail-bg {
-  min-height: 100vh;
-  width: 100%;
   position: fixed;
-  left: 0; top: 0;
+  inset: 0;
+  background: linear-gradient(135deg, #edf4ff 0%, #d3e2ff 100%);
   z-index: -1;
-  background: linear-gradient(-45deg, #a5d8ff, #f8faff, #d0ebff, #e7f5ff);
-  background-size: 350% 350%;
-  animation: gradientAurora 18s ease infinite;
-  opacity: 0.97;
 }
 
-@keyframes gradientAurora {
-  0% { background-position: 0% 60%; }
-  50% { background-position: 100% 40%; }
-  100% { background-position: 0% 60%; }
-}
-
-/* ===== Layout ===== */
+/* ======= CONTENEDOR PRINCIPAL ======= */
 .subject-detail {
-  position: relative;
-  z-index: 1;
-  max-width: 880px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 40px 0 24px;
+  padding: clamp(24px, 5vw, 48px);
+  font-family: "Poppins", system-ui, sans-serif;
+  color: #2a3a5e;
 }
 
-/* ===== Banner de materia ===== */
+/* ======= BANNER DE LA MATERIA ======= */
 .subject-banner {
   display: flex;
   align-items: center;
-  gap: 30px;
-  padding: 30px 44px;
-  background: linear-gradient(120deg, #ffffff 80%, #edf6ff 100%);
-  border-radius: 24px;
-  box-shadow: 0 8px 30px rgba(76, 110, 245, 0.15);
-  margin-bottom: 28px;
-  animation: slideInDown 0.8s cubic-bezier(.43,.77,.56,.87);
+  gap: 20px;
+  background: linear-gradient(120deg, #a8c7ff 0%, #cce0ff 100%);
+  border: 1px solid #cfe0ff;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(168, 199, 255, 0.45);
+  padding: clamp(18px, 4vw, 28px);
+  margin-bottom: 36px;
+}
+
+.sb-icon {
+  font-size: clamp(48px, 6vw, 70px);
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 6px 20px rgba(168, 199, 255, 0.3);
+}
+
+.sb-info {
+  flex: 1;
+}
+
+.sb-title {
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 800;
+  color: #1f336b;
+  margin-bottom: 6px;
+}
+
+.sb-progress {
+  font-weight: 600;
+  color: #3b5493;
+  margin-bottom: 6px;
+}
+.sb-progress-val {
+  color: #3552a3;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.sb-desc {
+  color: #4e67a8;
+  font-size: 0.95rem;
+}
+
+/* ======= LISTA DE TEMAS ======= */
+.topics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ======= Mensaje vacío ======= */
+.topics-empty {
+  background: #ffffff;
+  border: 1px dashed #cfe0ff;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(168, 199, 255, 0.3);
+  text-align: center;
+  padding: 28px 20px;
+  color: #4b64a5;
+}
+
+.topics-empty .te-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* ======= Tarjetas de temas ======= */
+.topic-card {
+  background: #ffffff;
+  border: 1px solid #cfe0ff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(168, 199, 255, 0.35);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.topic-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(168, 199, 255, 0.45);
+}
+
+/* ======= Encabezado de tema ======= */
+.topic-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.topic-icon {
+  font-size: 28px;
+  background: #edf4ff;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 10px rgba(168, 199, 255, 0.35);
+}
+
+.topic-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2e488f;
+}
+
+.topic-type {
+  color: #5b70a3;
+  font-size: 0.85rem;
+}
+
+/* ======= Descripción del tema ======= */
+.topic-desc {
+  color: #4e67a8;
+  font-size: 0.95rem;
+  margin: 8px 0 14px;
+}
+
+/* ======= Botones ======= */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-info {
+  background: #ffffff;
+  border: 1px solid #cfe0ff;
+  color: #3552a3;
+  box-shadow: 0 4px 10px rgba(168, 199, 255, 0.25);
+}
+.btn-info:hover {
+  background: #f1f6ff;
+  transform: translateY(-2px);
+}
+
+.btn-practice {
+  background: linear-gradient(135deg, #7bb0ff, #a8c7ff);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(168, 199, 255, 0.45);
+}
+.btn-practice:hover {
+  background: linear-gradient(135deg, #9ec2ff, #c4dbff);
+  transform: translateY(-2px);
+}
+
+/* ======= Acción inferior (Volver) ======= */
+.subject-actions {
+  text-align: center;
+  margin-top: 36px;
+}
+
+.btn-back {
+  background: #ffffff;
+  border: 1px solid #cfe0ff;
+  border-radius: 12px;
+  padding: 10px 18px;
+  color: #3552a3;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 6px 18px rgba(168, 199, 255, 0.35);
+}
+.btn-back:hover {
+  background: #f4f8ff;
+  transform: translateY(-2px);
+}
+
+/* ======= Animaciones ======= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ======= Responsive ======= */
+@media (max-width: 768px) {
+  .subject-banner {
+    flex-direction: column;
+    text-align: center;
+  }
 
   .sb-icon {
-    font-size: 3rem;
-    background: #fff;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(116, 192, 252, 0.3);
+    font-size: 50px;
+    padding: 12px;
+  }
+
+  .topic-card {
     padding: 16px;
   }
 
-  .sb-title {
-    font-size: 2.1rem;
-    margin-bottom: 10px;
-    font-weight: 900;
-    color: var(--primary);
-  }
-
-  .sb-progress {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--muted);
-    margin-top: 5px;
-
-    .sb-progress-val {
-      background: var(--accent);
-      border-radius: 8px;
-      padding: 4px 12px;
-      color: var(--success);
-      font-weight: 800;
-      margin-left: 6px;
-      box-shadow: 0 1px 8px rgba(76, 110, 245, 0.1);
-    }
-  }
-
-  .sb-desc {
-    color: var(--text);
-    font-size: 1rem;
-    line-height: 1.4;
-  }
-}
-
-/* ===== Lista de temas ===== */
-.topics-list {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  padding: 24px 22px;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(76, 110, 245, 0.15);
-  margin-bottom: 24px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  justify-content: center;
-}
-
-/* ===== Tarjetas de temas ===== */
-.topic-card {
-  background: linear-gradient(120deg, #ffffff 80%, #edf6ff 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 14px rgba(76, 110, 245, 0.1);
-  padding: 26px 32px;
-  min-width: 230px;
-  max-width: 335px;
-  min-height: 210px;
-  border: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
-  animation: fadeIn 0.7s ease-out;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 28px rgba(76, 110, 245, 0.25);
-    background: linear-gradient(120deg, #edf6ff 80%, #ffffff 100%);
-  }
-
-  .topic-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 5px;
-
-    .topic-icon {
-      font-size: 1.6rem;
-      color: var(--primary);
-    }
-
-    .topic-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin: 0;
-    }
-
-    .topic-type {
-      font-size: 0.95rem;
-      color: var(--primary-2);
-      font-weight: 600;
-    }
-  }
-
-  .topic-desc {
-    font-size: 1rem;
-    color: var(--text);
-    margin-bottom: 10px;
-  }
-
   .action-buttons {
-    margin-top: auto;
-    display: flex;
-    gap: 14px;
-
-    button {
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-info {
-      background: var(--primary-2);
-      color: #fff;
-
-      &:hover { filter: brightness(1.1); }
-    }
-
-    .btn-practice {
-      background: #b2f2bb;
-      color: var(--success);
-
-      &:hover { filter: brightness(1.05); }
-    }
+    flex-direction: column;
   }
-}
-
-/* ===== Acciones ===== */
-.subject-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 22px;
-
-  .btn-back {
-    background: var(--accent);
-    color: var(--primary);
-    border-radius: 10px;
-    padding: 10px 28px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 1px 6px rgba(76, 110, 245, 0.2);
-    transition: background 0.2s, transform 0.2s;
-
-    &:hover {
-      background: var(--primary-2);
-      color: #fff;
-      transform: translateY(-2px);
-    }
-  }
-}
-
-/* ===== Estados vacíos ===== */
-.topics-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
-  color: var(--muted);
-  padding: 48px 0;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.9);
-  margin: 28px 0;
-  box-shadow: 0 4px 16px rgba(76, 110, 245, 0.1);
-
-  .te-icon {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    color: var(--primary);
-  }
-
-  .te-text {
-    text-align: center;
-    font-weight: 600;
-    line-height: 1.5;
-  }
-}
-
-/* ===== Animaciones ===== */
-@keyframes slideInDown {
-  0% { transform: translateY(-60px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes fadeIn {
-  0% { opacity: 0; transform: scale(0.98); }
-  100% { opacity: 1; transform: scale(1); }
 }
