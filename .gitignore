@@ -1,14 +1,5 @@
-# deps
-node_modules/
-# Angular cache y builds
-.angular/
-dist/
-# IDE/OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-# logs y env
-*.log
-.env
-.env.*
+/node_modules/
+/dist/
+/.angular/
+/.env
+package-lock.json
