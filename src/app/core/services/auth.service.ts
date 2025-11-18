@@ -90,9 +90,16 @@ updateUser(user: Partial<User>) {
 
   /** Cierre de sesión */
   logout(): void {
-    localStorage.clear();
-    this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    // Intenta revocar el token en backend; si falla, igualmente limpia local
+    this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
+      next: () => {},
+      error: () => {},
+      complete: () => {
+        localStorage.clear();
+        this.currentUserSubject.next(null);
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   /** Solicitud de recuperación de contraseña */

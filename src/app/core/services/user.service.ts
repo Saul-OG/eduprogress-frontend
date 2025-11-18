@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '@env/environment';
 
 @Injectable({
@@ -12,7 +12,9 @@ export class UserService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+    return this.http.get<any>(this.apiUrl).pipe(
+      map((res: any) => Array.isArray(res) ? res : (res?.data ?? []))
+    );
   }
 
   getById(id: number): Observable<any> {

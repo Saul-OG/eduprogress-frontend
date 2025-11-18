@@ -1,4 +1,4 @@
-export interface User {
+﻿export interface User {
   id: number;
   name: string;
   username: string;
@@ -7,7 +7,6 @@ export interface User {
   lives: number;
   points: number;
   level: number;
-  streak_days: number;
   created_at?: string;
   updated_at?: string;
   is_admin?: boolean; // Para compatibilidad con backend antiguo
@@ -23,3 +22,4 @@ export interface LoginResponse {
   token_type: string;
   user: User;
 }
+

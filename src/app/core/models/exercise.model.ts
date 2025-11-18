@@ -2,6 +2,7 @@ export interface Exercise {
   id: number;
   topic_id: number;
   question: string;
+  level?: number;
   options?: string[]; // <- en array si vienen agrupadas
   correct_answer?: number | string;
   difficulty?: string;

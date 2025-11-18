@@ -1,32 +1,86 @@
-<div class="reports-page">
-  <h2>📊 Reportes Generales</h2>
+<div class="reports-shell">
+  <header class="reports-header">
+    <div>
+      <p class="eyebrow">Panel administrativo</p>
+      <h2>Reportes</h2>
+      <p class="subtitle">Visualiza el desempeño general y genera gráficos personalizados.</p>
+    </div>
+    <div class="header-controls">
+      <label>
+        Rango
+        <select [ngModel]="range" (ngModelChange)="onRangeChange($event)">
+          <option value="7d">7 días</option>
+          <option value="30d">30 días</option>
+          <option value="90d">90 días</option>
+        </select>
+      </label>
+      <button type="button" class="btn primary" (click)="openChartModal()">Constructor de gráficos</button>
+    </div>
+  </header>
 
-  <!-- Sección de estadísticas generales -->
-  <section *ngIf="generalStats">
-    <p><strong>Ejercicios totales:</strong> {{ generalStats.total_exercises || 0 }}</p>
-    <p><strong>Respuestas correctas:</strong> {{ generalStats.correct_answers || 0 }}</p>
-    <p><strong>Respuestas incorrectas:</strong> {{ generalStats.wrong_answers || 0 }}</p>
-    <p><strong>Precisión:</strong> {{ generalStats.accuracy || 0 }}%</p>
+  <section class="kpi-grid">
+    <article class="kpi-card">
+      <span class="label">Ejercicios totales</span>
+      <strong>{{ generalStats.total_exercises || 0 }}</strong>
+      <p>* Incluye todos los tipos de preguntas</p>
+    </article>
+    <article class="kpi-card">
+      <span class="label">Precisión</span>
+      <strong>{{ generalStats.accuracy || 0 }}%</strong>
+      <p>Respuestas correctas: {{ generalStats.correct_answers || 0 }}</p>
+    </article>
   </section>
 
-  <!-- Promedio por materia -->
-  <section *ngIf="subjects.length > 0; else noSubjects">
-    <h3>📘 Promedio por materia</h3>
-    <ul>
-      <li *ngFor="let s of subjects">
-        {{ s.subject_name }} — {{ s.avg_progress }}% progreso promedio
-      </li>
-    </ul>
-  </section>
-  <ng-template #noSubjects><p>Sin datos de materias disponibles.</p></ng-template>
+  <section class="subjects-panel">
+    <header>
+      <div>
+        <h3>Rendimiento por materia</h3>
+        <p>Promedios y participación por tema.</p>
+      </div>
+      <label>
+        Ordenar por
+        <select [ngModel]="subjectFilter" (ngModelChange)="onSubjectFilterChange($event)">
+          <option value="all">Actualizado</option>
+          <option value="progress">Mayor progreso</option>
+          <option value="engagement">Más ejercicios completados</option>
+        </select>
+      </label>
+    </header>
 
-  <!-- Materias más vistas -->
-  <section *ngIf="mostViewed.labels.length > 0">
-    <h3>📈 Materias más vistas</h3>
+    <div class="subjects-list" *ngIf="filteredSubjects.length; else noSubjects">
+      <article class="subject-item" *ngFor="let subject of filteredSubjects | slice:0:5">
+        <div>
+          <h4>{{ subject.subject_name || 'Materia' }}</h4>
+          <p class="muted">Última actualización: {{ subject.updated_at || 'N/D' }}</p>
+        </div>
+        <div class="subject-progress">
+          <div class="bar">
+            <span [style.width.%]="subject.avg_progress || 0"></span>
+          </div>
+          <small>{{ subject.avg_progress || 0 }}%</small>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="most-viewed" *ngIf="(mostViewed?.labels?.length || 0) > 0">
+    <header>
+      <div>
+        <h3>Materias más consultadas</h3>
+        <p>Basado en vistas y sesiones recientes.</p>
+      </div>
+    </header>
     <ul>
       <li *ngFor="let name of mostViewed.labels; let i = index">
-        {{ name }} — {{ mostViewed.values[i] }} vistas
+        <span>{{ name }}</span>
+        <strong>{{ mostViewed.values[i] || 0 }} vistas</strong>
       </li>
     </ul>
   </section>
+
+  <ng-template #noSubjects>
+    <div class="empty-state">Aún no hay datos de materias disponibles.</div>
+  </ng-template>
 </div>
+
+<app-chart-modal *ngIf="showChartModal" (close)="closeChartModal()"></app-chart-modal>

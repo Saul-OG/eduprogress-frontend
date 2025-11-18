@@ -6,6 +6,8 @@ import { adminGuard } from './core/guards/admin.guard';
 
 const routes: Routes = [
   { path: 'login', loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule) },
+  { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(c => c.RegisterComponent) },
+  { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(c => c.ResetPasswordComponent) },
 
   {
     path: 'student',

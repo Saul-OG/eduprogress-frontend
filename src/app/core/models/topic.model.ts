@@ -13,25 +13,32 @@ export interface Exercise {
 }
 
 export interface Topic {
-  id: number;                        // ✅ requerido
+  id: number;                        // âœ… requerido
   subject_id: number;
   title: string;
   description?: string;
   theory_content?: string;
+  example_content?: string;
   order?: number;
+  level?: number;                    // Nivel del tema (1..n)
+  unit?: number;
   is_active: boolean;
 
   type?: 'texto' | 'video' | 'ABCD';
   video_url?: string;
+  estimated_time?: number;
 
-  // sólo para ABCD si decides mantenerlo plano en topic
+  // solo para ABCD si decides mantenerlo plano en topic
   optionA?: string;
   optionB?: string;
   optionC?: string;
   optionD?: string;
   correct_option?: 'A' | 'B' | 'C' | 'D';
+  exercise_description?: string;
 
   exercises?: Exercise[];
   created_at?: string;
   updated_at?: string;
+  progress_percentage?: number;
 }
+

@@ -1,140 +1,42 @@
-<!-- MODAL: Importar Estudiantes -->
-<div class="modal-overlay" (click)="closeModal()" aria-hidden="true"></div>
-
-<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="importTitle" (click)="$event.stopPropagation()">
-  <!-- Header -->
-  <header class="modal-header">
-    <div class="modal-title-wrap">
-      <h2 id="importTitle">➕ Importar Cantidad de Estudiantes</h2>
-      <p class="modal-subtitle">Carga grupos y cantidades para generar un gráfico instantáneo.</p>
+<div class="chart-page">
+  <header class="chart-header">
+    <div>
+      <p class="eyebrow">Panel administrativo</p>
+      <h2>Constructor de gráficos</h2>
+      <p class="subtitle">Importa tus datos o usa la serie automática para analizar inscripciones.</p>
     </div>
-    <button class="close-btn" type="button" (click)="closeModal()" aria-label="Cerrar">✖</button>
+    <div class="actions">
+      <button class="btn ghost" type="button" routerLink="../reports">Volver a reportes</button>
+      <button class="btn primary" type="button" (click)="renderChart()">Actualizar vista</button>
+    </div>
   </header>
 
-  <!-- Tabs -->
-  <nav class="modal-tabs" aria-label="Método de importación">
-    <button type="button"
-            class="tab-btn"
-            [class.active]="activeTab === 'paste'"
-            (click)="activeTab = 'paste'">📝 Pegar texto</button>
-    <button type="button"
-            class="tab-btn"
-            [class.active]="activeTab === 'csv'"
-            (click)="activeTab = 'csv'">📄 Subir CSV</button>
-  </nav>
+  <section class="chart-grid">
+    <section class="config-card">
+      <h3>Preferencias</h3>
+      <label for="chartType">Tipo de gráfico</label>
+      <select id="chartType" [ngModel]="chartType" (ngModelChange)="onChartTypeChange($event)">
+        <option value="line">Líneas</option>
+        <option value="bar">Barras</option>
+      </select>
 
-  <form [formGroup]="importForm" (ngSubmit)="onImport()" class="modal-form" novalidate>
-
-    <!-- TAB: Pegar texto -->
-    <section *ngIf="activeTab === 'paste'" class="tab-panel" aria-labelledby="pasteTab">
-      <div class="form-group">
-        <label for="studentsRaw" class="form-label">Pega tu lista (NombreGrupo, Cantidad)</label>
-        <textarea id="studentsRaw"
-                  formControlName="rawInput"
-                  rows="7"
-                  placeholder="Ejemplo:
-Primero,32
-Segundo,35
-Tercero,29"></textarea>
-
-        <div class="form-row helpers">
-          <small class="hint">Formato soportado: <code>Nombre,Cantidad</code> por línea. Se ignoran líneas vacías.</small>
-          <div class="form-actions-inline">
-            <button type="button" class="link-btn" (click)="pasteSample()">Pegar ejemplo</button>
-            <button type="button" class="link-btn" (click)="clearInput()">Limpiar</button>
-          </div>
-        </div>
+      <div class="quick-info">
+        <span class="badge">Días: {{ parsedLabels.length || 0 }}</span>
+        <span class="badge">Inscripciones: {{ totalStudents }}</span>
       </div>
     </section>
 
-    <!-- TAB: Subir CSV -->
-    <section *ngIf="activeTab === 'csv'" class="tab-panel" aria-labelledby="csvTab">
-      <div class="dropzone"
-           (dragover)="onDragOver($event)"
-           (drop)="onFileDrop($event)">
-        <input type="file" accept=".csv,text/csv" (change)="onFileSelect($event)" hidden #fileInput>
-        <p class="dropzone-text">
-          Arrastra tu archivo CSV aquí o
-          <button type="button" class="link-btn" (click)="fileInput.click()">examínalo</button>
-        </p>
-        <small class="hint">Estructura esperada: <code>Nombre,Cantidad</code></small>
+    <section class="preview-card">
+      <header>
+        <h3>Vista previa</h3>
+        <p *ngIf="!hasParsedValues">No hay datos disponibles para este periodo.</p>
+      </header>
+      <div class="preview-chart" *ngIf="hasParsedValues; else emptyPreview">
+        <canvas id="studentsChartModal" aria-label="Gráfico de inscripciones por día"></canvas>
       </div>
-
-      <div class="file-meta" *ngIf="selectedFileName">
-        <span>Archivo: <strong>{{ selectedFileName }}</strong></span>
-        <button type="button" class="link-btn" (click)="removeFile()">Quitar</button>
-      </div>
+      <ng-template #emptyPreview>
+        <div class="empty-state">Sin datos disponibles.</div>
+      </ng-template>
     </section>
-
-    <!-- Ajustes rápidos -->
-    <section class="quick-settings">
-      <div class="form-row">
-        <div class="form-group sm">
-          <label for="delimiter" class="form-label">Delimitador</label>
-          <select id="delimiter" formControlName="delimiter">
-            <option value=",">Coma (,)</option>
-            <option value=";">Punto y coma (;)</option>
-            <option value="|">Barra (|)</option>
-          </select>
-        </div>
-
-        <div class="form-group sm">
-          <label for="chartType" class="form-label">Tipo de gráfico</label>
-          <select id="chartType" formControlName="chartType">
-            <option value="bar">Barras</option>
-            <option value="line">Líneas</option>
-            <option value="pie">Pie</option>
-            <option value="doughnut">Doughnut</option>
-            <option value="radar">Radar</option>
-          </select>
-        </div>
-
-        <div class="form-group sm">
-          <label class="form-label">Totales</label>
-          <div class="totals">
-            <span class="badge">Grupos: {{ parsedLabels.length || 0 }}</span>
-            <span class="badge">Estudiantes: {{ totalStudents }}</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Vista previa -->
-    <section class="preview" *ngIf="hasParsedValues">
-      <h3 class="section-title">👀 Vista previa</h3>
-
-      <div class="preview-grid">
-        <div class="preview-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Grupo</th>
-                <th style="text-align:right;">Estudiantes</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let label of parsedLabels; let i = index">
-                <td>{{ label }}</td>
-                <td style="text-align:right;">{{ parsedData[i] || 0 }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="preview-chart">
-          <canvas id="studentsChartModal" aria-label="Gráfico de estudiantes por grupo"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <!-- Botones -->
-    <footer class="modal-actions">
-      <button type="submit" class="modal-btn modal-btn-primary" [disabled]="loading || !canImport">
-        {{ loading ? 'Procesando…' : 'Importar y Graficar' }}
-      </button>
-      <button type="button" class="modal-btn modal-btn-secondary" (click)="closeModal()" [disabled]="loading">
-        ✖️ Cancelar
-      </button>
-    </footer>
-  </form>
+  </section>
 </div>

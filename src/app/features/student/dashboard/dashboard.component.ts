@@ -16,6 +16,9 @@ export class DashboardComponent implements OnInit {
   userProgress: any[] = [];
   userName: string = '';
   loading = true;
+  lastSubjectId: number | null = null;
+
+  readonly completionThreshold = 80;
 
   constructor(
     private subjectService: SubjectService,
@@ -27,6 +30,8 @@ export class DashboardComponent implements OnInit {
 
 ngOnInit(): void {
   this.userName = this.authService.currentUserValue?.username || 'Estudiante';
+  const stored = localStorage.getItem('lastSubjectId');
+  this.lastSubjectId = stored ? Number(stored) : null;
   this.loadData();
 }
 
@@ -37,6 +42,11 @@ ngOnInit(): void {
       next: (subjects) => {
         console.log('Subjects loaded:', subjects);
         this.subjects = subjects;
+        // Si el último id guardado ya no existe, limpiar para no mostrar botón inválido
+        if (this.lastSubjectId && !this.subjects.find(s => s.id === this.lastSubjectId)) {
+          this.lastSubjectId = null;
+          localStorage.removeItem('lastSubjectId');
+        }
         this.loadProgress();
       },
       error: (error) => {
@@ -64,7 +74,102 @@ ngOnInit(): void {
   }
 
   selectSubject(subjectId: number): void {
+    this.lastSubjectId = subjectId;
+    localStorage.setItem('lastSubjectId', String(subjectId));
     this.router.navigate(['/student/subject', subjectId]);
+  }
+
+  trackBySubject(_index: number, item: Subject): number {
+    return item.id;
+  }
+
+  get overallProgress(): number {
+    if (!this.subjects.length) {
+      return 0;
+    }
+    const total = this.subjects.reduce((sum, subject) => {
+      const percentage = this.getProgressForSubject(subject.id).percentage || 0;
+      return sum + percentage;
+    }, 0);
+    return Math.round(total / this.subjects.length);
+  }
+
+  get completedSubjectsCount(): number {
+    return this.subjects.filter(subject => {
+      const percentage = this.getProgressForSubject(subject.id).percentage || 0;
+      return percentage >= this.completionThreshold;
+    }).length;
+  }
+
+  get inProgressSubjectsCount(): number {
+    return this.subjects.filter(subject => {
+      const percentage = this.getProgressForSubject(subject.id).percentage || 0;
+      return percentage > 0 && percentage < this.completionThreshold;
+    }).length;
+  }
+
+  get nextFocusSubject(): Subject | null {
+    if (!this.subjects.length) {
+      return null;
+    }
+    const pending = this.subjects
+      .map(subject => ({
+        subject,
+        progress: this.getProgressForSubject(subject.id).percentage || 0
+      }))
+      .filter(item => item.progress < 100)
+      .sort((a, b) => a.progress - b.progress);
+
+    if (pending.length) {
+      return pending[0].subject;
+    }
+
+    const fallback = this.subjects
+      .map(subject => ({
+        subject,
+        progress: this.getProgressForSubject(subject.id).percentage || 0
+      }))
+      .sort((a, b) => b.progress - a.progress);
+
+    return fallback[0]?.subject || null;
+  }
+
+  get nextFocusSubjectProgress(): number {
+    if (!this.nextFocusSubject) {
+      return 0;
+    }
+    return this.getProgressForSubject(this.nextFocusSubject.id).percentage || 0;
+  }
+
+  get resumeSubject(): Subject | null {
+    if (!this.lastSubjectId) {
+      return null;
+    }
+    return this.subjects.find(s => s.id === this.lastSubjectId) || null;
+  }
+
+  get subjectProgressSnapshots(): { subject: Subject; progress: number }[] {
+    return this.subjects.map(subject => ({
+      subject,
+      progress: this.getProgressForSubject(subject.id).percentage || 0
+    }));
+  }
+
+  get recentHighlights(): { subject: Subject; progress: number }[] {
+    const snapshots = this.subjectProgressSnapshots;
+    return snapshots
+      .sort((a, b) => b.progress - a.progress)
+      .slice(0, 3);
+  }
+
+  progressLabel(progress: number): string {
+    if (progress >= this.completionThreshold) {
+      return 'Completada';
+    }
+    if (progress >= 40) {
+      return 'En progreso';
+    }
+    return 'Pendiente';
   }
 
   logout(): void {

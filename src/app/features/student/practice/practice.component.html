@@ -1,58 +1,138 @@
-<!-- 🎮 HUD Gamificado -->
-<div class="hud-container">
-  <div class="hud-item lives" aria-label="Vidas">
-    ❤️ <span>{{ lives }}</span>
-    <small>Vidas</small>
+<div class="practice-page">
+  <section class="practice-hud">
+    <div class="hud-card lives" aria-label="Vidas">
+      <div class="value hearts">
+        <ng-container *ngFor="let full of getHeartsArray(lives); let i = index">
+          <span [attr.aria-label]="full ? 'vida' : 'sin vida'" [innerHTML]="full ? '&#x2665;' : '&#9825;'"></span>
+        </ng-container>
+      </div>
+      <small>Vidas</small>
+    </div>
+    <div class="hud-card level">
+      <div class="label">Nivel</div>
+      <div class="value">{{ level }}</div>
+    </div>
+    <div class="hud-card streak">
+      <div class="label">Racha</div>
+      <div class="value">
+        <span class="icon">🔥</span>
+        <span>{{ streak }}</span>
+      </div>
+      <div class="streak-meta muted">Máx: {{ bestStreak }}</div>
+    </div>
+  </section>
+
+  <div class="modal-overlay" *ngIf="showNoLivesModal">
+    <div class="modal-card">
+      <h3>Sin vidas disponibles</h3>
+      <p>Se te acabaron las vidas. Puedes reiniciar la práctica para recuperar todas o volver a la materia.</p>
+      <div class="modal-actions">
+        <button class="btn-return" type="button" (click)="restartPractice()" [disabled]="resettingLives">
+          {{ resettingLives ? 'Reiniciando...' : 'Reiniciar práctica' }}
+        </button>
+        <button class="btn-return secondary" type="button" (click)="goBackToSubject()">Volver a la materia</button>
+      </div>
+    </div>
   </div>
 
-  <div class="hud-item points" aria-label="Puntos">
-    🎯 <span>{{ points }}</span>
-    <small>Puntos</small>
+<ng-container *ngIf="practiceCompleted; else practiceBody">
+  <div class="completion-card">
+    <h2>¡Práctica completada!</h2>
+    <p>Respondiste todos los ejercicios de este tema.</p>
+    <div class="feedback-card">
+      <div class="icon-badge">⭐</div>
+      <div class="feedback-stats">
+        <div>
+          <span class="label">Aciertos</span>
+          <strong>{{ practiceAccuracy }}%</strong>
+        </div>
+        <div>
+          <span class="label">Vidas restantes</span>
+          <strong>{{ lives }}</strong>
+        </div>
+      </div>
+      <p class="feedback-message">{{ completionMessage }}</p>
+    </div>
+    <div class="completed-actions">
+      <button class="btn-return" type="button" (click)="restartPractice()">Reiniciar práctica</button>
+      <button class="btn-return secondary" type="button" (click)="goBackToSubject()">Volver a la materia</button>
+    </div>
   </div>
+  </ng-container>
 
-  <div class="hud-item level" aria-label="Nivel">
-    🧱 <span>{{ level }}</span>
-    <small>Nivel</small>
-  </div>
+  <ng-template #practiceBody>
+    <div class="practice-layout" *ngIf="!loading && currentExercise; else loadingTpl">
+      <section class="challenge-card">
+        <div class="challenge-head">
+          <p class="eyebrow">Ejercicio {{ currentIndex + 1 }} / {{ exercises.length }}</p>
+          <h2>{{ currentExercise.question }}</h2>
+        </div>
 
-  <div class="hud-item streak" [class.active]="streak > 0" aria-label="Racha">
-    🔥 <span>{{ streak }}</span>
-    <small>Racha</small>
-  </div>
-</div>
+        <div class="challenge-controls">
+          <button class="ghost-btn" type="button" (click)="toggleTheory()">
+            {{ showTheory ? 'Ver opciones' : 'Ver teoría' }}
+          </button>
+        </div>
 
-<!-- Pantalla de práctica -->
-<div class="practice-screen" *ngIf="!loading && currentExercise; else loadingTpl">
-  <h2>{{ currentExercise.question }}</h2>
+        <div class="theory-panel" *ngIf="showTheory" aria-live="polite">
+          <h3>Teoría</h3>
+          <pre>{{ topicTheory || 'No hay teoría disponible para este tema.' }}</pre>
+        </div>
 
-  <div class="practice-options" role="group" aria-label="Opciones de respuesta">
-    <button
-      *ngFor="let option of currentExercise.options; trackBy: trackByIndex"
-      type="button"
-      (click)="submitAnswer(option)"
-      [attr.aria-label]="'Responder ' + option">
-      {{ option }}
-    </button>
-  </div>
+        <div class="practice-options" role="group" aria-label="Opciones de respuesta" *ngIf="!showTheory">
+          <button
+            *ngFor="let option of currentExercise.options; let i = index; trackBy: trackByIndex"
+            type="button"
+            (click)="submitAnswer(i)"
+            [disabled]="lives <= 0"
+            [attr.aria-label]="'Responder ' + option">
+            {{ option }}
+          </button>
+        </div>
 
-  <!-- Feedback visual -->
-  <div class="show-result" *ngIf="feedback">
-    <span [style.color]="isCorrect ? 'green' : 'red'">{{ feedback }}</span>
-  </div>
+        <div class="feedback" *ngIf="feedback">
+          <span [class.correct]="isCorrect" [class.incorrect]="isCorrect === false">{{ feedback }}</span>
+        </div>
+      </section>
 
-  <!-- Info de progreso -->
-  <div class="user-progress">
-    <p><strong>Puntos:</strong> {{ points }}</p>
-    <p><strong>Nivel:</strong> {{ level }}</p>
-    <p><strong>Racha:</strong> {{ streak }} 🔥</p>
-    <p><strong>Vidas:</strong> {{ lives }} ❤️</p>
-  </div>
+      <aside class="practice-side">
+        <div class="side-card progress-card">
+          <p class="eyebrow">Progreso</p>
+        <div class="progress-meta">
+          <span>{{ completedCount }} / {{ exercises.length }} resueltos</span>
+          <div class="corte-progress">
+            <div
+              class="corte"
+              *ngFor="let corte of practiceSegments; let i = index"
+              [attr.data-label]="i === 0 ? '30%' : (i === 1 ? '30%' : '40%')">
+              <span [style.width.%]="corte"></span>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <div class="side-card status-card">
+          <p class="eyebrow">Estado</p>
+          <ul>
+            <li><span>Nivel</span><strong>{{ level }}</strong></li>
+            <li><span>Vidas</span><strong>{{ lives }}</strong></li>
+          </ul>
+        </div>
+
+        <div class="side-card tip-card">
+          <p class="eyebrow">Consejo</p>
+          <p>Si necesitas apoyo, revisa la teoría antes de volver a responder.</p>
+          <button class="secondary-btn" type="button" (click)="goBackToSubject()">Visitar materia</button>
+        </div>
+      </aside>
+    </div>
+  </ng-template>
 </div>
 
 <ng-template #loadingTpl>
   <div class="loading">
     <div class="spinner" aria-hidden="true"></div>
-    <p *ngIf="loading">Cargando ejercicio…</p>
+    <p *ngIf="loading">Cargando ejercicio...</p>
     <p *ngIf="!loading && !currentExercise">No hay ejercicios para este tema.</p>
   </div>
 </ng-template>

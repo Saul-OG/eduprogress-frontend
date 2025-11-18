@@ -31,4 +31,17 @@ export class TopicService {
   delete(id: number) {
     return this.http.delete(`${this.api}/topics/${id}`);
   }
+
+  getById(id: number): Observable<Topic> {
+    return this.http.get<Topic>(`${this.api}/topics/${id}`);
+  }
+
+  // Carga masiva de ejercicios ABCD para un tópico
+  bulkAddExercises(topicId: number, items: Array<{question: string; options: string[]; correct_answer: number; difficulty?: string; level?: number;}>) {
+    return this.http.post(`${this.api}/topics/${topicId}/exercises/bulk`, { items });
+  }
+
+  markProgress(topicId: number, type: 'theory' | 'video' | 'practice') {
+    return this.http.post(`${this.api}/topics/${topicId}/progress`, { type });
+  }
 }

@@ -1,8 +1,8 @@
-<div class="login-screen">
+﻿<div class="login-screen">
   <div class="login-container">
     <div class="login-left">
-      <h1>🚀 L.I.T 🚀</h1>
-      <p>¡Crea tu cuenta gratuita para comenzar a aprender y practicar!</p>
+      <h1>Bienvenido a L.I.T</h1>
+      <p>Crea tu cuenta gratuita para comenzar a aprender y practicar.</p>
     </div>
     <div class="login-right">
       <h2>Registro de estudiante</h2>
@@ -24,13 +24,13 @@
             placeholder="Crea tu usuario único">
         </div>
         <div class="form-group">
-         <label for="email">Correo electrónico</label>
-        <input 
-          type="email"
-          id="email"
-          formControlName="email"
-          placeholder="Escribe tu correo">
-             </div>
+          <label for="email">Correo electrónico</label>
+          <input 
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="Escribe tu correo">
+        </div>
         <div class="form-group">
           <label for="password">Contraseña</label>
           <input 
@@ -48,21 +48,21 @@
             placeholder="Repite tu contraseña">
         </div>
         <div class="error-message" *ngIf="errorMessage">
-          ⚠️ {{ errorMessage }}
+          {{ errorMessage }}
         </div>
         <div class="error-message" *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
-         El usuario debe tener mínimo 4 caracteres.
-         </div>
-         <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+          El usuario debe tener mínimo 4 caracteres.
+        </div>
+        <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
           La contraseña debe tener mínimo 6 caracteres.
-         </div>
+        </div>
         <button type="submit" class="login-btn" [disabled]="loading">
           <span *ngIf="!loading">Crear cuenta</span>
           <span *ngIf="loading">Cargando...</span>
         </button>
       </form>
       <div class="login-extra">
-        <a routerLink="/login">← Volver a iniciar sesión</a>
+        <a routerLink="/login">Volver a iniciar sesión</a>
         <span>Solo estudiantes pueden registrarse desde aquí.</span>
       </div>
     </div>

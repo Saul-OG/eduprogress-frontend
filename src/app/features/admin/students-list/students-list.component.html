@@ -1,26 +1,98 @@
-<div class="admin-layout">
-  <div class="main-container">
-    <div class="content-area">
-      <div class="admin-screen">
-        <h2>👥 Gestión de Estudiantes</h2>
-        
-        <div class="admin-section" style="max-width: 300px; margin-bottom: 36px;">
-          <h3>📊 Total de Usuarios</h3>
-          <div class="stats-grid" style="grid-template-columns: 1fr;">
-            <div class="stat-card" style="text-align: center;">
-              <div class="stat-icon" style="font-size: 2.3rem;">👤</div>
-              <div class="stat-value" style="font-size: 2.7rem; margin: 0.2em 0;">{{ stats.total_users || 0 }}</div>
-              <div class="stat-label" style="color: #8690b3;">Usuarios registrados</div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="action-buttons" style="margin-top: 22px;">
-          <button class="btn btn-info" (click)="exportStudents()">
-            📊 Exportar Datos
-          </button>
-        </div>
-      </div>
+<div class="students-page">
+  <header class="students-header">
+    <div>
+      <p class="eyebrow">Panel administrativo</p>
+      <h2>Gestión de usuarios</h2>
+      <p class="subtitle">Monitorea el avance, roles y participación.</p>
     </div>
-  </div>
+    <div class="header-actions">
+      <button class="btn ghost" type="button" (click)="refresh()">Refrescar</button>
+      <button class="btn primary" type="button" (click)="exportStudents()">Exportar CSV</button>
+    </div>
+  </header>
+
+  <section class="stats-overview">
+    <article class="stat-card">
+      <span class="label">Usuarios totales</span>
+      <strong>{{ stats.total_users || filteredStudents.length || students.length }}</strong>
+      <p>Registrados en la plataforma</p>
+    </article>
+    <article class="stat-card">
+      <span class="label">Administradores</span>
+      <strong>{{ adminCount }}</strong>
+      <p>Con permisos ampliados</p>
+    </article>
+  </section>
+
+  <section class="filters-panel">
+    <div class="filter-field search">
+      <label>Buscar</label>
+      <input type="search" [ngModel]="searchTerm" (ngModelChange)="onSearch($event)" placeholder="Nombre o correo" />
+    </div>
+    <div class="filter-field">
+      <label>Rol</label>
+      <select [ngModel]="roleFilter" (ngModelChange)="onRoleChange($event)">
+        <option value="all">Cualquier rol</option>
+        <option value="student">Estudiantes</option>
+        <option value="admin">Administradores</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label>Ordenar por</label>
+      <select [ngModel]="sortOption" (ngModelChange)="onSortChange($event)">
+        <option value="recent">Actividad reciente</option>
+        <option value="progress">Mayor progreso</option>
+        <option value="name">Nombre</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="table-card" *ngIf="!loading; else loadingState">
+    <div class="table-head">
+      <h3>Listado</h3>
+      <span>{{ filteredStudents.length }} estudiantes</span>
+    </div>
+    <table *ngIf="filteredStudents.length; else emptyState">
+      <thead>
+        <tr>
+          <th>Estudiante</th>
+          <th>Rol</th>
+          <th>Progreso</th>
+          <th>Último acceso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of filteredStudents; trackBy: trackByStudent">
+          <td>
+            <strong>{{ student.name || 'Sin nombre' }}</strong>
+            <span class="muted">{{ student.email || 'sin correo' }}</span>
+          </td>
+          <td>
+            <span class="pill" [class.admin]="student.is_admin">{{ student.is_admin ? 'Admin' : 'Estudiante' }}</span>
+          </td>
+          <td>
+            <div class="progress-row">
+              <div class="bar">
+                <span [style.width.%]="student.progress || 0"></span>
+              </div>
+              <small>{{ student.progress ?? 0 }}%</small>
+            </div>
+          </td>
+          <td>{{ student.last_login || student.created_at || 'N/D' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <ng-template #loadingState>
+    <section class="table-card loading">
+      <p>Cargando estudiantes...</p>
+    </section>
+  </ng-template>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <p>No hay estudiantes que coincidan con los filtros.</p>
+    </div>
+  </ng-template>
 </div>

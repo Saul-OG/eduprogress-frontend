@@ -1,59 +1,127 @@
-
-<div class="student-layout">
-<div class="dashboard-topbar gamified">
-  <div class="user-info">
-    <img class="avatar" src="https://api.dicebear.com/6.x/fun-emoji/svg?seed={{ authService.currentUserValue?.username || 'Estudiante' }}" alt="avatar" />
-    <div>
-      <div class="dashboard-greeting">
-        ¡Hola, <span class="username">{{ authService.currentUserValue?.username || 'Estudiante' }}</span> 👋!
+<div class="dashboard-wrapper">
+  <section class="hero-card">
+    <div class="hero-main">
+      <div class="user-meta">
+        <h1>Hola, <span>{{ userName }}</span></h1>
       </div>
-      <span class="subtitle">¡Listo para aprender y ganar puntos!</span>
+      <p class="hero-copy">
+        Mantén tu streak completando retos cortos cada día. Revisa tus materias y enfócate en la siguiente misión para subir de nivel.
+      </p>
+      <div class="hero-actions">
+        <button class="primary-btn" type="button" *ngIf="resumeSubject" (click)="selectSubject(resumeSubject.id)">
+          Continuar con {{ resumeSubject.name }}
+        </button>
+        <button class="primary-btn" type="button" (click)="logout()">Cerrar sesión</button>
+      </div>
     </div>
-  </div>
-  <button class="logout-btn" (click)="logout()">
-    <span class="logout-icon">🚪</span> Salir
-  </button>
-</div>
-  
-  <div class="main-container">
+  </section>
 
+  <section class="stats-grid">
+    <article class="stat-card">
+      <div class="icon-badge">📘</div>
+      <div>
+        <p>Materias totales</p>
+        <h3>{{ subjects.length }}</h3>
+      </div>
+    </article>
+    <article class="stat-card">
+      <div class="icon-badge">🏆</div>
+      <div>
+        <p>Materias completadas</p>
+        <h3>{{ completedSubjectsCount }}</h3>
+      </div>
+    </article>
+  </section>
 
-    
-    <div class="content-area">
-      <div class="dashboard-header">
-        <h1>📊 Dashboard de Progreso</h1>
-        <p>¡Increíble trabajo! Aquí puedes ver tu progreso en todas las materias y seguir mejorando cada día. 🌟</p>
-        
-        <div class="progress-grid" *ngIf="!loading">
-          <div class="progress-card" 
-               *ngFor="let subject of subjects"
-               [class]="subject.name.toLowerCase()"
-               (click)="selectSubject(subject.id)">
-            <h3>{{ subject.icon }} {{ subject.name }}</h3>
+  <div class="dashboard-main">
+    <section class="progress-section">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Tus materias</p>
+          <h2>Progreso por materia</h2>
+        </div>
+      </div>
+
+      <div class="progress-grid" *ngIf="!loading && subjects.length; else progressState">
+        <article class="subject-card"
+                 *ngFor="let subject of subjects; trackBy: trackBySubject"
+                 (click)="selectSubject(subject.id)">
+          <div class="subject-card__head">
+            <div>
+              <h3>{{ subject.name }}</h3>
+              <p class="subject-description">{{ subject.description }}</p>
+            </div>
+            <span class="status-chip"
+                  [class.completed]="getProgressForSubject(subject.id).percentage >= completionThreshold"
+                  [class.in-progress]="getProgressForSubject(subject.id).percentage >= 40 && getProgressForSubject(subject.id).percentage < completionThreshold">
+              {{ progressLabel(getProgressForSubject(subject.id).percentage || 0) }}
+            </span>
+          </div>
+          <div class="subject-card__progress">
             <div class="circular-progress">
               <svg viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="45" class="progress-bg"></circle>
-                <circle 
-                  cx="50" 
-                  cy="50" 
-                  r="45" 
-                  class="progress-bar"
-                  [style.stroke-dashoffset]="283 - (283 * getProgressForSubject(subject.id).percentage / 100)">
-                </circle>
+                <circle cx="50" cy="50" r="45" class="progress-bar"
+                        [style.stroke-dashoffset]="283 - (283 * getProgressForSubject(subject.id).percentage / 100)"></circle>
               </svg>
               <div class="progress-value">
                 {{ getProgressForSubject(subject.id).percentage | number:'1.0-0' }}%
               </div>
             </div>
-            <p>{{ getProgressForSubject(subject.id).percentage >= 70 ? '¡Excelente!' : '¡Sigue así!' }} 🎉</p>
+            <div class="progress-meta">
+              <span>Actualiza tu racha en esta materia</span>
+              <button class="link-btn" type="button" (click)="$event.stopPropagation(); selectSubject(subject.id)">Ver detalles</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <aside class="side-panel">
+      <div class="panel-card achievements-card">
+        <p class="eyebrow">Logros rápidos</p>
+        <div class="badge-list">
+          <div class="badge">
+            <span class="label">Materias activas</span>
+            <strong>{{ inProgressSubjectsCount }}</strong>
+          </div>
+          <div class="badge">
+            <span class="label">Completadas</span>
+            <strong>{{ completedSubjectsCount }}</strong>
+          </div>
+          <div class="badge">
+            <span class="label">Total de materias</span>
+            <strong>{{ subjects.length }}</strong>
           </div>
         </div>
-        
-        <div class="loading" *ngIf="loading">
-          <div class="spinner"></div>
-          <p>Cargando tu progreso...</p>
-        </div>
       </div>
-    </div>
+
+      <div class="panel-card activity-card" *ngIf="recentHighlights.length">
+        <p class="eyebrow">Actividad reciente</p>
+        <ul>
+          <li *ngFor="let highlight of recentHighlights">
+            <div>
+              <strong>{{ highlight.subject.name }}</strong>
+              <span>{{ highlight.progress | number:'1.0-0' }}% completado</span>
+            </div>
+            <span class="status-chip"
+                  [class.completed]="highlight.progress >= completionThreshold"
+                  [class.in-progress]="highlight.progress >= 40 && highlight.progress < completionThreshold">
+              {{ progressLabel(highlight.progress) }}
+            </span>
+          </li>
+        </ul>
+      </div>
+    </aside>
   </div>
+
+  <ng-template #progressState>
+    <div class="loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Cargando tu progreso...</p>
+    </div>
+    <div class="empty-state" *ngIf="!loading && !subjects.length">
+      <p>No hay materias disponibles aún. Vuelve más tarde.</p>
+    </div>
+  </ng-template>
 </div>

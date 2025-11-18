@@ -1,41 +1,98 @@
-<div class="theory-bg"></div>
+<div class="theory-page">
+  <ng-container *ngIf="!loading && topic; else loadingTpl">
+    <section class="theory-hero">
+      <p class="eyebrow">{{ (topic.type === 'video' || topic.video_url) ? 'Recurso en video' : 'Contenido teórico' }}</p>
+      <h1>{{ topic.title }}</h1>
+      <div class="meta-chips">
+        <span class="chip">{{ (topic.type === 'video' || topic.video_url) ? 'Video' : 'Teoría' }}</span>
+        <span class="chip">Nivel {{ topic.level || 1 }}</span>
+      </div>
+    </section>
 
-<div class="student-layout">
-  <div class="main-container">
-    <div class="content-area theory-screen">
-
-      <ng-container *ngIf="!loading && topic; else loadingTpl">
-        <h2>📖 Contenido Teórico - {{ topic.title }}</h2>
-
-        <div class="theory-content">
-          <div [innerHTML]="topic.theory_content"></div>
+    <div class="theory-layout">
+      <article class="content-panel">
+        <div class="video-wrapper" *ngIf="topic?.video_url">
+          <iframe
+            [src]="videoEmbedUrl || sanitizeUrl(topic.video_url)"
+            width="100%"
+            height="360"
+            frameborder="0"
+            allowfullscreen>
+          </iframe>
         </div>
-
-        <div *ngIf="topic.type === 'video' && topic.video_url">
-          <h2>Recurso en Video</h2>
-          <div class="video-wrapper">
-            <iframe
-              [src]="sanitizeUrl(topic.video_url)"
-              width="100%"
-              height="330"
-              frameborder="0"
-              allowfullscreen>
-            </iframe>
+        <div class="content-card" *ngIf="topic.theory_content">
+          <div class="theory-content">
+            <div [innerHTML]="topic.theory_content"></div>
+          </div>
+          <div class="example-toolbar">
+            <div class="example-copy">
+              <p class="example-title">¿Necesitas ver el concepto aplicado?</p>
+              <p class="example-subtitle" *ngIf="hasExample; else noExampleCopy">Explora un caso guiado para reforzar esta teoría.</p>
+              <ng-template #noExampleCopy>
+                <p class="example-subtitle muted">El administrador todavía no ha añadido un ejemplo para este tema.</p>
+              </ng-template>
+            </div>
+            <button class="example-btn" type="button" (click)="openExample()" [disabled]="!hasExample">Ver ejemplo</button>
           </div>
         </div>
-
-        <div class="action-buttons">
-          <button class="btn btn-back" (click)="goBack()">← Volver a Materia</button>
+        <div class="empty-card" *ngIf="!topic.theory_content && !topic.video_url">
+          <p>No hay contenido disponible para este tema.</p>
         </div>
-      </ng-container>
+      </article>
 
-      <ng-template #loadingTpl>
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Cargando contenido teórico...</p>
+      <aside class="meta-panel">
+        <div class="meta-card">
+          <p class="eyebrow">Resumen</p>
+          <ul>
+            <li>
+              <span>Tipo</span>
+              <strong>{{ (topic.type === 'video' || topic.video_url) ? 'Video' : 'Teoría' }}</strong>
+            </li>
+            <li>
+              <span>Nivel</span>
+              <strong>{{ topic.level || 1 }}</strong>
+            </li>
+            <li *ngIf="topic.estimated_time">
+              <span>Tiempo estimado</span>
+              <strong>{{ topic.estimated_time }} min</strong>
+            </li>
+          </ul>
         </div>
-      </ng-template>
 
+        <div class="meta-card cta-card">
+          <p class="eyebrow">Siguiente paso</p>
+          <p>Refuerza lo aprendido practicando ejercicios del mismo tema.</p>
+          <div class="cta-buttons">
+            <button class="primary-btn" type="button" (click)="goToPractice()">Ir a práctica</button>
+            <button class="ghost-btn" type="button" (click)="goBack()">Volver a la materia</button>
+          </div>
+        </div>
+      </aside>
     </div>
-  </div>
+  </ng-container>
 </div>
+
+<div class="example-overlay" *ngIf="showExampleModal" (click)="closeExample()">
+  <article class="example-modal" (click)="$event.stopPropagation()">
+    <header class="example-modal__header">
+      <div>
+        <p class="eyebrow">Ejemplo</p>
+        <h3>Aplicación del tema</h3>
+      </div>
+      <button type="button" class="example-close" (click)="closeExample()">&times;</button>
+    </header>
+    <section class="example-body" aria-live="polite">
+      <div [innerHTML]="exampleContent"></div>
+    </section>
+    <footer class="example-footer">
+      <button class="ghost-btn" type="button" (click)="closeExample()">Cerrar</button>
+    </footer>
+  </article>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Cargando contenido...</p>
+  </div>
+</ng-template>

@@ -71,6 +71,32 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  onForgotPassword(): void {
+    const email = prompt('Ingresa tu correo para recuperar la contraseña:');
+    if (!email) { return; }
+    this.loading = true;
+    this.authService.forgotPassword(email).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        const token = res?.reset_token;
+        if (!token) {
+          alert('Si el correo existe, se envió un token (modo dev).');
+          return;
+        }
+        const newPass = prompt('Ingresa tu nueva contraseña:');
+        if (!newPass) { return; }
+        const confirm = prompt('Confirma tu nueva contraseña:');
+        if (newPass !== confirm) { alert('No coincide la confirmación.'); return; }
+        this.loading = true;
+        this.authService.resetPassword({ email, token, password: newPass, password_confirmation: confirm }).subscribe({
+          next: () => { this.loading = false; alert('Contraseña restablecida. Ya puedes iniciar sesión.'); },
+          error: (err) => { this.loading = false; alert(err?.error?.message || 'No se pudo restablecer la contraseña'); }
+        });
+      },
+      error: () => { this.loading = false; alert('No se pudo iniciar el proceso'); }
+    });
+  }
+
   private redirectUser(): void {
     if (this.authService.isAdmin()) {
       this.router.navigate(['/admin']);

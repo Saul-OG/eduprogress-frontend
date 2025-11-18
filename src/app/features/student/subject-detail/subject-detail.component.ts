@@ -15,6 +15,9 @@ import { catchError, map, take } from 'rxjs/operators';
 export class SubjectDetailComponent implements OnInit {
   subject: Subject | null = null;
   topics: Topic[] = [];
+  groupedByLevel: { level: number; items: Topic[] }[] = [];
+  levels: number[] = [];
+  selectedLevel: number | 'all' = 'all';
   progress: { percentage?: number } | null = null;
   loading = true;
   subjectId!: number;
@@ -74,7 +77,13 @@ export class SubjectDetailComponent implements OnInit {
         const s: any = subjectRes || {};
         this.subject = s.subject ?? s ?? null;
         this.progress = s.progress ?? this.progress ?? null;
-        this.topics = topics;
+
+        const topicsFromSubject = (this.subject as any)?.topics as Topic[] | undefined;
+        // Preferir los topics que ya vienen con progress_percentage del endpoint de detalle
+        this.topics = Array.isArray(topicsFromSubject) && topicsFromSubject.length
+          ? topicsFromSubject
+          : topics;
+        this.applyGrouping();
         this.loading = false;
       },
       error: (err) => {
@@ -82,6 +91,17 @@ export class SubjectDetailComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private applyGrouping(): void {
+    const map = new Map<number, Topic[]>();
+    for (const t of this.topics) {
+      const lvl = (t.level as number) || 1;
+      if (!map.has(lvl)) map.set(lvl, []);
+      map.get(lvl)!.push(t);
+    }
+    this.levels = Array.from(map.keys()).sort((a,b)=>a-b);
+    this.groupedByLevel = this.levels.map(l => ({ level: l, items: (map.get(l) || []).sort((a,b)=> (a.order||0)-(b.order||0)) }));
   }
 
   // Navegación
@@ -102,5 +122,143 @@ export class SubjectDetailComponent implements OnInit {
 
   goBackDashboard(): void {
     this.router.navigate(['/student']);
+  }
+
+  trackByTopic(_index: number, topic: Topic): number {
+    return topic.id;
+  }
+
+  get totalTopics(): number {
+    return this.topics.length;
+  }
+
+  get completedTopics(): number {
+    return this.topics.filter(topic => (topic.progress_percentage ?? 0) >= 99).length;
+  }
+
+  get levelsCount(): number {
+    return this.levels.length || 1;
+  }
+
+  levelProgress(level: number): number {
+    const items = this.topics.filter(t => (t.level || 1) === level);
+    if (!items.length) {
+      return 0;
+    }
+    const total = items.reduce((acc, t) => acc + (t.progress_percentage ?? 0), 0);
+    return Math.round(total / items.length);
+  }
+
+  topicProgress(topic: Topic): number {
+    return topic.progress_percentage ?? 0;
+  }
+
+  topicStatusLabel(topic: Topic): string {
+    const progress = this.topicProgress(topic);
+    if (progress >= 99) {
+      return 'Dominado';
+    }
+    if (progress >= 50) {
+      return 'En curso';
+    }
+    if (progress > 0) {
+      return 'Iniciado';
+    }
+    return 'Pendiente';
+  }
+
+  topicTypeLabel(topic: Topic): string {
+    if ((topic as any).video_url) {
+      return 'Video';
+    }
+    if (topic.theory_content) {
+      return 'Teoría';
+    }
+    if ((topic as any).type) {
+      return String((topic as any).type).toUpperCase();
+    }
+    return 'Tema';
+  }
+
+  canOpenTheory(topic: Topic): boolean {
+    return !!(topic.theory_content || (topic as any).video_url);
+  }
+
+  getLevelLabel(level?: number): string {
+    const map: Record<number, string> = {
+      1: 'Básico',
+      2: 'Intermedio',
+      3: 'Avanzado'
+    };
+    return map[level ?? 1] || 'Nivel';
+  }
+
+  getProgressSegments(value: number): number[] {
+    const weights = [30, 30, 40];
+    const segments: number[] = [];
+    let remaining = Math.max(0, Math.min(100, value));
+    for (const weight of weights) {
+      const filled = Math.min(remaining, weight);
+      const percent = weight === 0 ? 0 : Math.round((filled / weight) * 100);
+      segments.push(percent);
+      remaining -= filled;
+    }
+    return segments;
+  }
+
+  isLevelCompleted(level: number): boolean {
+    const group = this.groupedByLevel.find(g => g.level === level);
+    if (!group) {
+      return false;
+    }
+    return group.items.every(topic => (topic.progress_percentage ?? 0) >= 100);
+  }
+
+  isLevelUnlocked(level: number): boolean {
+    if (!this.levels.length) {
+      return true;
+    }
+    const idx = this.levels.indexOf(level);
+    if (idx === -1) {
+      return true;
+    }
+    if (idx <= 0) {
+      return true;
+    }
+    const previousLevel = this.levels[idx - 1];
+    return this.isLevelCompleted(previousLevel);
+  }
+
+  showLockedMessage(level: number): void {
+    const previous = level - 1;
+    const requiredLevel = previous > 0 ? previous : 1;
+    alert(`Completa el Nivel ${requiredLevel} para desbloquear este contenido.`);
+  }
+
+  onOpenTheory(topic: Topic): void {
+    const level = topic.level || 1;
+    if (!this.isLevelUnlocked(level)) {
+      this.showLockedMessage(level);
+      return;
+    }
+    this.goToTheory(topic.id);
+  }
+
+  onOpenPractice(topic: Topic): void {
+    const level = topic.level || 1;
+    if (!this.isLevelUnlocked(level)) {
+      this.showLockedMessage(level);
+      return;
+    }
+    this.goToPractice(topic.id);
+  }
+
+  onOpenVideo(topic: Topic): void {
+    const level = topic.level || 1;
+    if (!this.isLevelUnlocked(level)) {
+      this.showLockedMessage(level);
+      return;
+    }
+    this.goToVideo(topic);
   }
 }

@@ -1,5 +1,4 @@
-/* === Tema claro y motivador (Estudiante) === */
-:host {
+﻿:host {
   --bg: #f8faff;
   --card-bg: #ffffff;
   --primary: #667eea;
@@ -19,6 +18,6 @@
   color: var(--text);
 }
 
-/* Puedes importar aquí los estilos de práctica y dashboard */
+
 @import './practice/practice.component';
 @import './dashboard/student-dashboard.component';

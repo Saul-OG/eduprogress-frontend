@@ -10,6 +10,7 @@ import { AppComponent } from './app.component';
 
 // ⬇️ Tu interceptor XSRF
 import { XsrfInterceptor } from './core/interceptors/xsrf.interceptor';
+import { AuthTokenInterceptor } from './core/interceptors/auth-token.interceptor';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { XsrfInterceptor } from './core/interceptors/xsrf.interceptor';
   providers: [
     // ⬇️ Registra el interceptor
     { provide: HTTP_INTERCEPTORS, useClass: XsrfInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthTokenInterceptor, multi: true },
   ],
   bootstrap: [AppComponent]
 })

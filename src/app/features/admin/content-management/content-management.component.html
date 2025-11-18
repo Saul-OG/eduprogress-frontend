@@ -1,100 +1,384 @@
-<h2>📚 Gestión de Contenido</h2>
-
-<div class="action-buttons" style="margin-bottom: 30px; display: flex; gap: 24px;">
-  <div>
-    <label>📘 Selecciona materia:</label>
-    <select [(ngModel)]="selectedSubjectId" (change)="loadTopics()">
-      <option [value]="1">Matemáticas</option>
-      <option [value]="2">Español</option>
-    </select>
-  </div>
-  <button class="btn btn-practice" (click)="openNew()">➕ Agregar Tema</button>
-  <button class="btn btn-info" (click)="exportReport()">📄 Exportar Contenido</button>
-</div>
-
-<div *ngIf="loading" class="loading">
-  <div class="spinner" aria-hidden="true"></div>
-  <p>Cargando temas…</p>
-</div>
-
-<div *ngIf="!loading && errorMsg" class="error-banner">
-  {{ errorMsg }}
-</div>
-
-<div *ngIf="!loading && !errorMsg" class="admin-section">
-  <h3>Lista de Temas</h3>
-  <div *ngIf="topics.length === 0" class="no-topics">No hay temas registrados.</div>
-  <div *ngIf="topics.length > 0">
-    <div class="content-item" *ngFor="let topic of topics">
-      <div class="info">
-        <div class="title">{{ topic.title }}</div>
-        <div class="subtitle">{{ (topic.type || 'texto') | uppercase }}</div>
+﻿<section class="content-shell">
+  <header class="content-header">
+    <div>
+      <p class="eyebrow">Panel administrativo</p>
+      <h2>Gestion de Contenido</h2>
+      <p class="subtitle">Organiza unidades, niveles y recursos educativos.</p>
+    </div>
+    <div class="header-toolbar">
+      <div class="filter-control">
+        <label>Materia</label>
+        <div class="select-shell">
+          <select [(ngModel)]="selectedSubjectId" (change)="loadTopics()">
+            <option [value]="1">Matematicas</option>
+            <option [value]="2">Espanol</option>
+          </select>
+        </div>
       </div>
-      <div class="content-actions">
-        <button class="btn-edit" (click)="openEdit(topic)">✏️ Editar</button>
-        <button class="btn-delete" (click)="deleteTopic(topic)">🗑️ Eliminar</button>
+      <div class="filter-control">
+        <label>Nivel</label>
+        <div class="select-shell">
+          <select [(ngModel)]="levelFilter">
+            <option value="all">Todos</option>
+            <option *ngFor="let level of levelOptions" [ngValue]="level.value">{{ level.label }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-control search">
+        <label>Buscar</label>
+        <input type="search" [(ngModel)]="searchTerm" placeholder="Busca por titulo" />
+      </div>
+      <div class="toolbar-buttons">
+        <button type="button" class="btn ghost" (click)="exportReport()">Exportar</button>
+        <button type="button" class="btn primary" (click)="openNew()">Agregar Tema</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="toast" *ngIf="toastMessage" [class.success]="toastType==='success'" [class.error]="toastType==='error'" [class.info]="toastType==='info'">
+    <span>{{ toastMessage }}</span>
+    <button type="button" (click)="closeToast()">&times;</button>
+  </div>
+
+  <section *ngIf="loading" class="loading">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Cargando temas...</p>
+  </section>
+
+  <div *ngIf="errorMsg && !loading" class="error-banner">{{ errorMsg }}</div>
+
+  <section class="cards-panel" *ngIf="!loading && !errorMsg">
+    <h3>Lista de temas</h3>
+    <ng-container *ngIf="filteredTopics.length; else noTopics">
+      <div class="level-group" *ngFor="let level of levelOptions">
+        <ng-container *ngIf="levelFilter === 'all' || levelFilter === level.value">
+          <h4 class="level-heading">{{ level.label }}</h4>
+          <ng-container *ngIf="topicsByLevel(level.value).length; else emptyLevel">
+            <article class="content-item" *ngFor="let topic of topicsByLevel(level.value)">
+              <div class="info">
+                <h4>{{ topic.title }}</h4>
+                <div class="meta-line">
+                  <span class="meta-chip">{{ (topic.type || 'texto') | uppercase }}</span>
+                  <span class="meta-chip">{{ getLevelLabel(topic.level) }}</span>
+                </div>
+                <div class="stat-line">
+                  <span class="pill">
+                    <span class="pill-label">Preguntas</span>
+                    <strong>{{ getQuestionsCount(topic) }}</strong>
+                  </span>
+                </div>
+              </div>
+              <div class="content-actions">
+                <button class="btn-info" type="button" (click)="openBulkSimple(topic)">+ Preguntas</button>
+                <button class="btn-edit" type="button" (click)="openEdit(topic)">Editar</button>
+                <button class="btn-delete" type="button" (click)="deleteTopic(topic)">Eliminar</button>
+              </div>
+            </article>
+          </ng-container>
+        </ng-container>
+      </div>
+    </ng-container>
+  </section>
+
+  <ng-template #noTopics>
+    <div class="no-topics">No hay temas que coincidan con tu busqueda.</div>
+  </ng-template>
+  <ng-template #emptyLevel>
+    <div class="no-topics">Sin temas en este nivel.</div>
+  </ng-template>
+</section>
+
+<div class="confirm-overlay" *ngIf="confirmingDelete">
+  <div class="confirm-card">
+    <h4>&iquest;Eliminar tema?</h4>
+    <p>Estas a punto de eliminar "{{ confirmingDelete.title }}". Esta accion no se puede deshacer.</p>
+    <div class="confirm-actions">
+      <button class="btn-delete" type="button" (click)="confirmDeleteTopic()">Eliminar</button>
+      <button class="btn-cancel" type="button" (click)="cancelDelete()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showModal" class="modal-overlay">
+  <div class="modal-content large">
+    <div class="modal-header">
+      <div>
+        <p class="eyebrow">{{ isEditing ? 'Editar tema' : 'Nuevo tema' }}</p>
+        <h3>{{ isEditing ? topicForm.title : 'Crear nuevo contenido' }}</h3>
+      </div>
+      <button type="button" class="close-btn" (click)="closeModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <form (ngSubmit)="saveTopic()">
+        <div class="form-grid">
+          <div class="field">
+            <label>Materia</label>
+            <div class="select-shell">
+              <select [(ngModel)]="topicForm.subject_id" name="subject_id">
+                <option [ngValue]="1">Matematicas</option>
+                <option [ngValue]="2">Espanol</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Titulo</label>
+            <input [(ngModel)]="topicForm.title" name="title" required />
+          </div>
+          <div class="field">
+            <label>Descripcion</label>
+            <textarea [(ngModel)]="topicForm.description" name="description" rows="3"></textarea>
+          </div>
+          <div class="dual-fields">
+          <div class="field">
+            <label>Nivel</label>
+            <div class="select-shell">
+              <select [(ngModel)]="topicForm.level" name="level">
+                <option *ngFor="let level of levelOptions" [ngValue]="level.value">{{ level.label }}</option>
+              </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="editor-tabs">
+          <button type="button" [class.active]="activeEditorTab === 'theory'" (click)="setEditorTab('theory')">Teoria</button>
+          <button type="button" [class.active]="activeEditorTab === 'video'" (click)="setEditorTab('video')">Video</button>
+          <button type="button" [class.active]="activeEditorTab === 'abcd'" (click)="setEditorTab('abcd')">Practica</button>
+        </div>
+
+        <div class="tab-panel" [ngSwitch]="activeEditorTab">
+          <div *ngSwitchCase="'theory'" class="theory-editor">
+            <div class="theory-header">
+              <p class="eyebrow">Editor de teoria</p>
+              <h4>Contenido teorico</h4>
+              <span>Describe la explicacion o material de referencia.</span>
+            </div>
+            <textarea class="theory-textarea" [(ngModel)]="topicForm.theory_content" name="theory_content" rows="14" placeholder="Escribe aqui la teoria del tema"></textarea>
+            <div class="example-editor">
+              <div>
+                <p class="example-label">Ejemplo guiado <span>(opcional)</span></p>
+                <p class="example-help">Anade un caso breve que aparecera al pulsar \"Ver ejemplo\" desde el panel del estudiante.</p>
+              </div>
+              <textarea class="example-textarea" [(ngModel)]="topicForm.example_content" name="example_content" rows="6" placeholder="Redacta aqui el ejemplo o caso aplicado. Puedes usar HTML basico si lo necesitas."></textarea>
+            </div>
+          </div>
+          <div *ngSwitchCase="'video'">
+            <label>URL del video</label>
+            <input [(ngModel)]="topicForm.video_url" name="video_url" placeholder="https://" />
+          </div>
+          <div *ngSwitchCase="'abcd'" class="exercise-editor">
+            <div class="field">
+              <label>Descripcion del ejercicio</label>
+              <textarea class="exercise-description" [(ngModel)]="topicForm.exercise_description" name="exercise_description" rows="4" placeholder="Enunciado o contexto del ejercicio"></textarea>
+            </div>
+            <div class="abcd-grid">
+              <div class="field">
+                <label>Opcion A</label>
+                <textarea class="option-textarea" [(ngModel)]="topicForm.optionA" name="optionA" rows="2" required></textarea>
+              </div>
+              <div class="field">
+                <label>Opcion B</label>
+                <textarea class="option-textarea" [(ngModel)]="topicForm.optionB" name="optionB" rows="2" required></textarea>
+              </div>
+              <div class="field">
+                <label>Opcion C</label>
+                <textarea class="option-textarea" [(ngModel)]="topicForm.optionC" name="optionC" rows="2" required></textarea>
+              </div>
+              <div class="field">
+                <label>Opcion D</label>
+                <textarea class="option-textarea" [(ngModel)]="topicForm.optionD" name="optionD" rows="2" required></textarea>
+              </div>
+              <div class="field full">
+                <label>Opcion correcta</label>
+                <div class="select-shell">
+                  <select [(ngModel)]="topicForm.correct_option" name="correct_option" required>
+                    <option value="">Seleccione</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-save">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showBulkSimple" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <p class="eyebrow">Carga masiva</p>
+        <h3>Agregar Preguntas ABCD</h3>
+      </div>
+      <button type="button" class="close-btn" (click)="closeBulkSimple()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="bulk-header">
+        <div class="field small">
+          <label>Nivel (para todas)</label>
+          <div class="select-shell">
+            <select [(ngModel)]="bulkLevel" name="bulkLevelSimple">
+              <option *ngFor="let level of levelOptions" [ngValue]="level.value">{{ level.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-info" (click)="addBulkRow()">+ Anadir fila</button>
+          <button type="button" class="btn btn-info" (click)="clearBulkRows()">Limpiar</button>
+        </div>
+      </div>
+
+      <div class="bulk-area">
+        <div class="bulk-form">
+          <div class="bulk-item" *ngFor="let it of bulkItems; let i = index">
+            <div class="row">
+              <label>Pregunta</label>
+              <textarea class="bulk-textarea" [(ngModel)]="it.question" name="q{{i}}" rows="2" placeholder="Escribe la pregunta"></textarea>
+            </div>
+            <div class="row grid">
+              <div class="field">
+                <label>A</label>
+                <textarea class="bulk-option" [(ngModel)]="it.A" name="a{{i}}" rows="2"></textarea>
+              </div>
+              <div class="field">
+                <label>B</label>
+                <textarea class="bulk-option" [(ngModel)]="it.B" name="b{{i}}" rows="2"></textarea>
+              </div>
+              <div class="field">
+                <label>C</label>
+                <textarea class="bulk-option" [(ngModel)]="it.C" name="c{{i}}" rows="2"></textarea>
+              </div>
+              <div class="field">
+                <label>D</label>
+                <textarea class="bulk-option" [(ngModel)]="it.D" name="d{{i}}" rows="2"></textarea>
+              </div>
+              <div class="field">
+                <label>Correcta</label>
+                <div class="select-shell">
+                  <select [(ngModel)]="it.correct" name="correct{{i}}">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field end">
+                <button type="button" class="btn btn-delete" (click)="removeBulkRow(i)">Quitar</button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="bulkItems.length === 0" class="no-rows">Anade al menos una fila para visualizar la vista previa.</div>
+        </div>
+        <aside class="bulk-preview-panel">
+          <h4>Preview</h4>
+          <div *ngIf="bulkItems.length; else noSimplePreview">
+            <article *ngFor="let it of bulkItems" class="preview-card">
+              <h5>{{ it.question || 'Sin titulo' }}</h5>
+              <p>{{ it.A }} / {{ it.B }} / {{ it.C }} / {{ it.D }}</p>
+              <span class="badge">Correcta: {{ it.correct }}</span>
+            </article>
+          </div>
+          <ng-template #noSimplePreview>
+            <p class="muted">Las preguntas apareceran aqui.</p>
+          </ng-template>
+        </aside>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-cancel" (click)="closeBulkSimple()">Cancelar</button>
+        <button type="button" class="btn btn-save" (click)="saveBulkSimple()">Guardar</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modal -->
-<div *ngIf="showModal" class="modal-overlay">
+<div *ngIf="showBulk" class="modal-overlay">
   <div class="modal-content">
-    <h3>{{ isEditing ? 'Editar Tema' : 'Nuevo Tema' }}</h3>
-
-    <form (ngSubmit)="saveTopic()">
-      <label>Título:</label>
-      <input [(ngModel)]="topicForm.title" name="title" required />
-
-      <label>Tipo:</label>
-      <select [(ngModel)]="topicForm.type" name="type">
-        <option value="texto">Teoría</option>
-        <option value="video">Video</option>
-        <option value="ABCD">Ejercicio ABCD</option>
-      </select>
-
-      <label>Descripción:</label>
-      <textarea [(ngModel)]="topicForm.description" name="description"></textarea>
-
-      <div *ngIf="topicForm.type === 'texto'">
-        <label>Contenido de teoría:</label>
-        <textarea [(ngModel)]="topicForm.theory_content" name="theory_content"></textarea>
+    <div class="modal-header">
+      <div>
+        <p class="eyebrow">Carga avanzada</p>
+        <h3>Agregar preguntas ABCD (una por linea)</h3>
       </div>
+      <button type="button" class="close-btn" (click)="closeBulk()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="bulk-area">
+        <div class="bulk-form">
+          <p>Formatos soportados:</p>
+          <ul>
+            <li>Pregunta | A | B | C | D | Correcta(A/B/C/D)</li>
+            <li>A | B | C | D | Correcta(A/B/C/D) (usa titulo base)</li>
+          </ul>
+          <label>Titulo base (opcional)</label>
+          <input [(ngModel)]="bulkTitle" name="bulkTitle" placeholder="Ej: Ejercicio de sumas" />
 
-      <div *ngIf="topicForm.type === 'video'">
-        <label>URL de video:</label>
-        <input [(ngModel)]="topicForm.video_url" name="video_url" />
+          <div class="field small">
+            <label>Nivel</label>
+            <div class="select-shell">
+              <select [(ngModel)]="bulkLevel" name="bulkLevel">
+                <option *ngFor="let level of levelOptions" [ngValue]="level.value">{{ level.label }}</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Preguntas (una por linea)</label>
+          <textarea [(ngModel)]="bulkRaw" name="bulkRaw" rows="8" placeholder="Pregunta|A|B|C|D|A"></textarea>
+
+          <div class="builder">
+            <h4>Constructor rapido</h4>
+            <label>Pregunta</label>
+            <input [(ngModel)]="builderQ" name="builderQ" placeholder="Titulo de la pregunta" />
+            <div class="abcd-grid">
+              <div class="field"><label>A</label><input [(ngModel)]="builderA" name="builderA" /></div>
+              <div class="field"><label>B</label><input [(ngModel)]="builderB" name="builderB" /></div>
+              <div class="field"><label>C</label><input [(ngModel)]="builderC" name="builderC" /></div>
+              <div class="field"><label>D</label><input [(ngModel)]="builderD" name="builderD" /></div>
+              <div class="field full">
+                <label>Correcta</label>
+                <div class="select-shell">
+                  <select [(ngModel)]="builderCorrect" name="builderCorrect">
+                    <option value="">Seleccione</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-info" (click)="addLineFromBuilder()">Anadir linea</button>
+          </div>
+        </div>
+        <aside class="bulk-preview-panel">
+          <h4>Preview</h4>
+          <div *ngIf="bulkPreviewLines.length; else noPreview">
+            <article class="preview-card" *ngFor="let line of bulkPreviewLines">
+              <p>{{ line }}</p>
+            </article>
+          </div>
+          <ng-template #noPreview>
+            <p class="muted">Las lineas validas apareceran aqui.</p>
+          </ng-template>
+        </aside>
       </div>
-
-     <div *ngIf="topicForm.type === 'ABCD'">
-  <label>Opción A:</label>
-  <input [(ngModel)]="topicForm.optionA" name="optionA" required />
-
-  <label>Opción B:</label>
-  <input [(ngModel)]="topicForm.optionB" name="optionB" required />
-
-  <label>Opción C:</label>
-  <input [(ngModel)]="topicForm.optionC" name="optionC" required />
-
-  <label>Opción D:</label>
-  <input [(ngModel)]="topicForm.optionD" name="optionD" required />
-
-  <label>Opción Correcta:</label>
-  <select [(ngModel)]="topicForm.correct_option" name="correct_option" required>
-    <option value="">Seleccione</option>
-    <option value="A">A</option>
-    <option value="B">B</option>
-    <option value="C">C</option>
-    <option value="D">D</option>
-  </select>
-</div>
-
 
       <div class="modal-actions">
-        <button type="submit" class="btn btn-save">Guardar</button>
-        <button type="button" class="btn btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button type="button" class="btn btn-cancel" (click)="closeBulk()">Cancelar</button>
+        <button type="button" class="btn btn-save" (click)="saveBulk()">Guardar</button>
       </div>
-    </form>
+    </div>
   </div>
 </div>

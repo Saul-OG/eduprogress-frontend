@@ -1,67 +1,155 @@
-<div class="subject-detail-bg"></div>
-<div class="subject-detail">
-
-  <!-- Banner de la materia -->
-  <div class="subject-banner">
-    <div class="sb-icon">{{ subject?.icon }}</div>
-    <div class="sb-info">
-      <h2 class="sb-title">{{ subject?.name }}</h2>
-      <p class="sb-progress">
-        Progreso: <span class="sb-progress-val">{{ progress?.percentage || 0 | number:'1.0-0' }}%</span>
-      </p>
-      <div class="sb-desc">{{ subject?.description }}</div>
-    </div>
-  </div>
-
-  <!-- Lista de topics / mensaje vacio -->
-  <div class="topics-list">
-    <div *ngIf="topics.length === 0" class="topics-empty">
-      <span class="te-icon">🔍</span>
-      <span class="te-text">Aún no hay temas activos en esta materia.<br>¡Vuelve pronto!</span>
-    </div>
-    <div *ngFor="let topic of topics" class="topic-card">
-      <div class="topic-header">
-        <span class="topic-icon">
-          {{
-            topic.type === 'texto' ? '📖' :
-            topic.type === 'video' ? '🎬' :
-            topic.type === 'ABCD' ? '🧩' :
-            '📚'
-          }}
-        </span>
+<div class="subject-detail-page">
+  <ng-container *ngIf="!loading; else loadingTpl">
+    <section class="subject-hero" *ngIf="subject">
+      <div class="hero-header">
+        <div class="subject-icon">
+          {{ subject.icon || (subject.name || 'M')[0] }}
+        </div>
         <div>
-          <h3 class="topic-title">{{ topic.title }}</h3>
-          <span class="topic-type">
-            {{
-              topic.type === 'texto' ? 'Teoría' :
-              topic.type === 'video' ? 'Video' :
-              topic.type === 'ABCD' ? 'Ejercicio ABCD' :
-              'Tema'
-            }}
-          </span>
+          <p class="eyebrow">Materia</p>
+          <h1>{{ subject.name }}</h1>
+          <p class="subject-summary">{{ subject.description }}</p>
         </div>
       </div>
-      <p class="topic-desc">{{ topic.description }}</p>
-      <div class="action-buttons">
-        <button class="btn btn-info" *ngIf="topic.type === 'texto'" (click)="goToTheory(topic.id)">
-          📖 Ver teoría
-        </button>
-        <button class="btn btn-info" *ngIf="topic.type === 'video'" (click)="goToVideo(topic)">
-          🎬 Ver video
-        </button>
-       <button class="btn btn-practice" (click)="goToPractice(topic.id)">
-  🧩 Practicar
-</button>
-  
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="label">Nivel básico</span>
+          <span class="value">{{ levelProgress(1) }}%</span>
+          <div class="progress-bar">
+            <span [style.width.%]="levelProgress(1)"></span>
+          </div>
+          <small>Promedio nivel 1</small>
+        </div>
+        <div class="hero-stat">
+          <span class="label">Nivel intermedio</span>
+          <span class="value">{{ levelProgress(2) }}%</span>
+          <div class="progress-bar">
+            <span [style.width.%]="levelProgress(2)"></span>
+          </div>
+          <small>Promedio nivel 2</small>
+        </div>
+        <div class="hero-stat">
+          <span class="label">Nivel avanzado</span>
+          <span class="value">{{ levelProgress(3) }}%</span>
+          <div class="progress-bar">
+            <span [style.width.%]="levelProgress(3)"></span>
+          </div>
+          <small>Promedio nivel 3</small>
+        </div>
       </div>
+      <div class="hero-actions">
+        <button class="secondary-btn" type="button" (click)="goBackDashboard()">Volver al dashboard</button>
+      </div>
+    </section>
+
+    <section class="level-filter" *ngIf="levels.length">
+      <p class="eyebrow">Filtra por nivel</p>
+      <div class="chips">
+        <button class="chip" [class.active]="selectedLevel === 'all'" type="button" (click)="selectedLevel = 'all'">Todos</button>
+        <button class="chip"
+                *ngFor="let lvl of levels"
+                type="button"
+                [class.active]="selectedLevel === lvl"
+                (click)="selectedLevel = lvl">
+          Nivel {{ lvl }}
+        </button>
+      </div>
+    </section>
+
+    <div class="detail-body">
+      <section class="topics-section">
+        <ng-container *ngIf="topics.length; else emptyTopics">
+          <ng-container *ngFor="let group of groupedByLevel">
+            <ng-container *ngIf="selectedLevel === 'all' || selectedLevel === group.level">
+              <div class="level-group">
+                <div class="level-heading">
+                  <div>
+                    <p class="eyebrow">Nivel {{ group.level }}</p>
+                    <h2>{{ group.items.length }} {{ group.items.length === 1 ? 'tema' : 'temas' }}</h2>
+                  </div>
+                </div>
+                <div class="topic-grid">
+                  <article class="topic-card"
+                           *ngFor="let topic of group.items; trackBy: trackByTopic"
+                           [class.locked]="!isLevelUnlocked(topic.level || 1)">
+                    <div class="card-head">
+                      <div>
+                        <h3>{{ topic.title }}</h3>
+                        <p class="topic-meta">
+                          Unidad {{ topic.unit || 1 }} · {{ getLevelLabel(topic.level) }}
+                        </p>
+                        <p class="topic-desc">{{ topic.description }}</p>
+                      </div>
+                      <span class="status-chip"
+                            [class.completed]="topicProgress(topic) >= 100"
+                            [class.in-progress]="topicProgress(topic) >= 50 && topicProgress(topic) < 100">
+                        {{ topicStatusLabel(topic) }}
+                      </span>
+                    </div>
+                    <div class="topic-tags">
+                      <span class="tag tag-type">{{ topicTypeLabel(topic) }}</span>
+                      <span class="tag tag-unit">Unidad {{ topic.unit || 1 }}</span>
+                      <span class="tag tag-level">{{ getLevelLabel(topic.level) }}</span>
+                    </div>
+                     <div class="card-actions">
+                      <button class="ghost-btn" type="button" (click)="onOpenTheory(topic)" [disabled]="!canOpenTheory(topic)">
+                        Ver recurso
+                      </button>
+                      <button class="primary-btn" type="button" (click)="onOpenPractice(topic)">
+                        Practicar
+                      </button>
+                    </div>
+                    <div class="locked-overlay"
+                         *ngIf="!isLevelUnlocked(topic.level || 1)"
+                         (click)="showLockedMessage(topic.level || 1)">
+                      <div class="lock-icon">🔒</div>
+                      <p>Completa el nivel {{ (topic.level || 1) - 1 || 1 }} para desbloquear.</p>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+      </section>
+
+      <aside class="subject-side">
+        <div class="side-card">
+          <p class="eyebrow">Resumen rápido</p>
+          <ul>
+            <li>
+              <span>Temas totales</span>
+              <strong>{{ totalTopics }}</strong>
+            </li>
+            <li>
+              <span>Completados</span>
+              <strong>{{ completedTopics }}</strong>
+            </li>
+            <li>
+              <span>Niveles</span>
+              <strong>{{ levelsCount }}</strong>
+            </li>
+          </ul>
+        </div>
+        <div class="side-card tip-card">
+          <p class="eyebrow">Tip</p>
+          <p>Combina teoría y práctica del mismo día para consolidar el aprendizaje.</p>
+        </div>
+      </aside>
     </div>
-  </div>
-
-  <!-- Siempre visible al final para volver al dashboard -->
-  <div class="subject-actions">
-    <button class="btn-back" (click)="goBackDashboard()">
-      ← Volver al Dashboard
-    </button>
-  </div>
-
+  </ng-container>
 </div>
+
+<ng-template #loadingTpl>
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Cargando materia...</p>
+  </div>
+</ng-template>
+
+<ng-template #emptyTopics>
+  <div class="empty-state">
+    <p>Aún no hay temas activos en esta materia. Vuelve pronto.</p>
+    <button class="secondary-btn" type="button" (click)="goBackDashboard()">Ir al dashboard</button>
+  </div>
+</ng-template>

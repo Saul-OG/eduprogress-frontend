@@ -1,168 +1,441 @@
-/* 🎮 PRACTICE SCREEN - ESTILO PASTEL GAMIFICADO #a8c7ff */
-
-/* ====== Fondo general ====== */
-.practice-screen {
-  font-family: "Poppins", system-ui, sans-serif;
-  background: linear-gradient(135deg, #edf4ff 0%, #d3e2ff 100%);
-  color: #2a3a5e;
-  border-radius: 20px;
-  box-shadow: 0 12px 30px rgba(168, 199, 255, 0.45);
-  padding: clamp(24px, 4vw, 48px);
-  max-width: 900px;
-  margin: 60px auto;
-  text-align: center;
-  animation: fadeIn 0.3s ease-in-out;
+.practice-page {
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 60px) clamp(16px, 4vw, 56px);
+  background: linear-gradient(135deg, #e7efed 0%, #92e9e7 55%, #20dbd8 120%);
+  font-family: 'Poppins', system-ui, sans-serif;
+  color: #10384c;
 }
 
-/* ====== HUD superior (vidas, puntos, nivel, racha) ====== */
-.hud-container {
+.eyebrow {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #5f7c8d;
+  margin: 0;
+  font-weight: 600;
+}
+
+.practice-hud {
   display: flex;
-  justify-content: center;
-  gap: 22px;
-  margin-bottom: 24px;
   flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.hud-item {
-  background: #ffffff;
-  border: 1.5px solid #cfe0ff;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(168, 199, 255, 0.3);
-  padding: 10px 16px;
+.hud-card {
+  flex: 1;
+  min-width: 140px;
+  padding: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 235, 255, 0.92));
+  border-radius: 20px;
+  border: 1px solid rgba(168, 199, 255, 0.35);
+  box-shadow: 0 14px 30px rgba(53, 82, 163, 0.12);
   text-align: center;
+}
+
+.hud-card .label {
+  font-size: 0.85rem;
+  color: #5f7c8d;
+}
+
+.hud-card .value {
+  font-size: 1.6rem;
   font-weight: 700;
-  color: #2e488f;
-  min-width: 90px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: #10384c;
 }
-.hud-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(168, 199, 255, 0.45);
+.hud-card.streak .value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.6rem;
 }
-.hud-item small {
-  display: block;
-  font-size: 0.8rem;
-  color: #5b70a3;
-  font-weight: 500;
+.hud-card.streak .icon {
+  font-size: 1.6rem;
+}
+.streak-meta {
+  text-align: center;
+  color: #4f6b7c;
   margin-top: 4px;
 }
 
-.hud-item.streak.active {
-  background: linear-gradient(135deg, #ffd5d5, #ffb6b6);
-  border-color: #ffcaca;
-  color: #8c1f1f;
-  animation: pulse 1.5s infinite ease-in-out;
-}
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); }
+.hud-card .value.hearts span {
+  font-size: 1.4rem;
+  color: #ff9fb8;
+  margin: 0 2px;
 }
 
-/* ====== Pregunta principal ====== */
-.practice-screen h2 {
-  font-size: clamp(20px, 3vw, 26px);
-  font-weight: 800;
-  color: #3552a3;
-  margin-bottom: 24px;
-  line-height: 1.4;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(19, 33, 82, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
 }
 
-/* ====== Opciones ====== */
-.practice-options {
+.modal-card {
+  background: #fff;
+  padding: 32px;
+  border-radius: 24px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(31, 45, 86, 0.25);
+}
+
+.modal-card h3 {
+  margin-bottom: 12px;
+}
+
+.modal-card p {
+  color: #4f6b7c;
+  margin-bottom: 16px;
+}
+
+.modal-actions,
+.completed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-return {
+  min-width: 180px;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #20b0d8, #92e9e7);
+  color: #fff;
+  box-shadow: 0 16px 34px rgba(244, 138, 203, 0.35);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-return.secondary {
+  background: #fff;
+  color: #0f4f6b;
+  border: 1px solid rgba(253, 198, 230, 0.45);
+  box-shadow: 0 12px 26px rgba(53, 82, 163, 0.16);
+}
+
+.btn-return:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(111, 169, 255, 0.45);
+}
+
+.completion-card {
+  background: #fff;
+  border-radius: 28px;
+  padding: 40px 20px;
+  border: 1px solid rgba(168, 199, 255, 0.35);
+  box-shadow: 0 20px 50px rgba(53, 82, 163, 0.12);
+  text-align: center;
+}
+
+.feedback-card {
+  margin: 20px auto 10px;
+  max-width: 420px;
+  background: linear-gradient(135deg, rgba(111, 141, 255, 0.12), rgba(255, 182, 213, 0.2));
+  border: 1px solid rgba(253, 198, 230, 0.5);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: 0 16px 40px rgba(53, 82, 163, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.feedback-card .icon-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffd9a2, #92e9e7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #ffd9a2;
+  box-shadow: 0 12px 25px rgba(255, 155, 220, 0.35);
+}
+
+.feedback-stats {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.feedback-stats .label {
+  display: block;
+  font-size: 0.85rem;
+  color: #4f6b7c;
+  margin-bottom: 2px;
+}
+
+.feedback-stats strong {
+  font-size: 1.4rem;
+  color: #10384c;
+}
+
+.feedback-message {
+  font-weight: 600;
+  color: #0f4f6b;
+}
+
+.practice-layout {
   display: grid;
-  gap: 14px;
-  max-width: 600px;
-  margin: 0 auto 24px;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 0.8fr);
+  gap: clamp(18px, 4vw, 32px);
+  align-items: start;
+}
+
+.challenge-card {
+  background: #fff;
+  border-radius: 28px;
+  padding: clamp(18px, 3vw, 32px);
+  border: 1px solid rgba(168, 199, 255, 0.35);
+  box-shadow: 0 20px 50px rgba(53, 82, 163, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.challenge-head h2 {
+  margin: 6px 0 0;
+  font-size: clamp(20px, 3vw, 28px);
+  color: #10384c;
+}
+
+.challenge-controls {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ghost-btn,
+.secondary-btn {
+  border: 1px solid rgba(253, 198, 230, 0.55);
+  border-radius: 14px;
+  padding: 8px 18px;
+  background: #fff;
+  color: #2089d8;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ghost-btn:hover,
+.secondary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(53, 82, 163, 0.12);
+}
+
+.theory-panel {
+  background: #e7efed;
+  border-radius: 20px;
+  border: 1px solid rgba(168, 199, 255, 0.35);
+  padding: 16px;
+  color: #0f4f6b;
+  line-height: 1.5;
+}
+
+.practice-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
 }
 
 .practice-options button {
-  background: #ffffff;
-  border: 1.5px solid #cfe0ff;
-  border-radius: 12px;
-  padding: 12px 18px;
-  font-weight: 700;
-  color: #2e488f;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 6px 18px rgba(168, 199, 255, 0.3);
-}
-.practice-options button:hover {
-  background: linear-gradient(135deg, #a8c7ff 0%, #cde0ff 100%);
-  color: #fff;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 26px rgba(168, 199, 255, 0.5);
-}
-.practice-options button:active {
-  transform: translateY(0);
-}
-
-/* ====== Feedback visual ====== */
-.show-result {
-  margin: 16px 0;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-/* ====== Información de progreso ====== */
-.user-progress {
-  background: #ffffff;
-  border: 1px solid #cfe0ff;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(168, 199, 255, 0.3);
-  padding: 16px;
-  max-width: 340px;
-  margin: 0 auto;
+  background: #fff;
+  border: 1.5px solid rgba(168, 199, 255, 0.45);
+  border-radius: 16px;
+  padding: 12px 16px;
+  width: auto;
+  max-width: 100%;
+  font-weight: 600;
+  color: #10384c;
   text-align: left;
-  color: #3552a3;
+  box-shadow: 0 12px 30px rgba(53, 82, 163, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.user-progress p {
-  margin: 6px 0;
-  font-size: 0.95rem;
+.practice-options button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(99, 120, 203, 0.22);
+  background: linear-gradient(135deg, rgba(111, 141, 255, 0.18), rgba(255, 187, 221, 0.3));
 }
 
-/* ====== Estado de carga ====== */
+.practice-options button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedback {
+  text-align: center;
+  font-weight: 700;
+}
+
+.feedback span {
+  padding: 8px 16px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.feedback .correct {
+  background: rgba(110, 230, 185, 0.2);
+  color: #0f5c73;
+}
+
+.feedback .incorrect {
+  background: rgba(255, 155, 155, 0.25);
+  color: #ff9fb4;
+}
+
+.practice-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.side-card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 18px;
+  border: 1px solid rgba(168, 199, 255, 0.35);
+  box-shadow: 0 16px 36px rgba(53, 82, 163, 0.12);
+}
+
+.progress-card .progress-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #4f6b7c;
+}
+
+.progress-card .corte-progress {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.progress-card .corte-progress .corte {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: #e7efed;
+  overflow: hidden;
+  &:after {
+    content: attr(data-label);
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: #5f7c8d;
+  }
+}
+
+.progress-card .corte-progress .corte span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #20b0d8, #92e9e7);
+  transition: width 0.4s ease;
+}
+
+.status-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #4f6b7c;
+}
+
+.status-card li {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tip-card p {
+  margin: 0 0 12px;
+  color: #4f6b7c;
+  line-height: 1.4;
+}
+
 .loading {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #5b70a3;
-  padding: 40px;
-  font-weight: 600;
+  justify-content: center;
+  gap: 12px;
+  color: #4f6b7c;
+  padding: 40px 0;
 }
+
 .spinner {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 3px solid #e6efff;
-  border-top-color: #7bb0ff;
+  border: 3px solid #e7efed;
+  border-top-color: #20dbd8;
   animation: spin 0.8s linear infinite;
-  margin-bottom: 10px;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* ====== Animaciones generales ====== */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+@media (max-width: 960px) {
+  .practice-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* ====== Responsive ====== */
 @media (max-width: 768px) {
-  .practice-screen {
-    margin: 40px auto;
-    padding: 24px;
+  .practice-page {
+    padding: 20px clamp(12px, 6vw, 30px) 40px;
   }
-  .hud-container {
-    gap: 12px;
+  .practice-hud {
+    flex-direction: column;
+  }
+  .practice-options {
+    grid-template-columns: 1fr;
+  }
+  .practice-side {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 420px) {
+  .hud-card {
+    min-width: auto;
+    width: 100%;
+  }
+  .challenge-card {
+    padding: 18px;
   }
   .practice-options button {
-    font-size: 0.95rem;
-    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+  .card-actions button,
+  .completed-actions .btn-return {
+    width: 100%;
+    text-align: center;
+  }
+  .feedback-card {
+    padding: 16px;
   }
 }

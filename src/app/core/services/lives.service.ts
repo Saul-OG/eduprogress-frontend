@@ -9,36 +9,26 @@ export class LivesService {
   private apiUrl = `${environment.apiUrl}`;
   private livesSubject = new BehaviorSubject<number>(3);
 
-  /** 🔁 Observable al que otros componentes pueden suscribirse */
   public lives$ = this.livesSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * 📡 Obtiene las vidas actuales desde el backend
-   * y actualiza el estado local (BehaviorSubject)
-   */
-  getLives(): Observable<{ lives: number }> {
-    return this.http.get<{ lives: number }>(`${this.apiUrl}/lives`).pipe(
+  getLives(): Observable<{ lives: number; lives_max?: number; next_life_at?: string }> {
+    return this.http.get<{ lives: number; lives_max?: number; next_life_at?: string }>(`${this.apiUrl}/lives`).pipe(
       tap(response => this.livesSubject.next(response.lives))
     );
   }
-  
-updateLives(lives: number): void {
-  this.livesSubject.next(lives);
-}
 
-  /**
-   * 💾 Actualiza las vidas localmente (sin llamar al backend)
-   * Ideal cuando el backend ya devuelve el valor actualizado (p.ej. al responder ejercicios)
-   */
+  resetLives(): Observable<{ lives: number; lives_max?: number; next_life_at?: string }> {
+    return this.http.post<{ lives: number; lives_max?: number; next_life_at?: string }>(`${this.apiUrl}/lives/reset`, {}).pipe(
+      tap(response => this.livesSubject.next(response.lives))
+    );
+  }
+
   setLives(lives: number): void {
     this.livesSubject.next(lives);
   }
 
-  /**
-   * 🧠 Devuelve las vidas actuales (sincrónicamente)
-   */
   get currentLives(): number {
     return this.livesSubject.value;
   }

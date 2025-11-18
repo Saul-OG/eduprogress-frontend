@@ -16,7 +16,7 @@ export class ExerciseService {
     return this.http.get<Exercise[]>(`${this.apiUrl}/topics/${topicId}/exercises`);
   }
 
-  submitAnswer(exerciseId: number, payload: { answer: string }): Observable<any> {
+  submitAnswer(exerciseId: number, payload: { answer: number | string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/exercises/${exerciseId}/submit`, payload);
   }
 }

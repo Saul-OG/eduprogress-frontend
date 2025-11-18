@@ -33,10 +33,14 @@
       </form>
       <div class="login-extra">
         <a routerLink="/register">¿No tienes cuenta? Registrarse</a>
+          <div style="margin-top:10px">
+          <a href="#" (click)="$event.preventDefault(); onForgotPassword()">¿Olvidaste tu contraseña?</a>
+        </div>
         <span>
           Estudiantes y administradores acceden aquí.<br>
-          El administrador debe existir en la base de datos.
+       
         </span>
+      
       </div>
     </div>
   </div>
